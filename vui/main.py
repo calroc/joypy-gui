@@ -11,7 +11,7 @@ reload(text_viewer)
 import persist_task
 reload(persist_task)
 
-from joy.library import initialize
+from joy.library import initialize, SimpleFunctionWrapper
 
 
 JOY_HOME = os.environ.get('JOY_HOME')
@@ -33,8 +33,6 @@ try:
     D = D
 except NameError:
     D = initialize()
-##for func in ():
-##  D[func.__name__] = func
 
 
 try:
@@ -71,10 +69,8 @@ def error_guard(loop, n=10):
             error_count += 1
 
 
-d = None
-def main():
-    global d
-    screen, clock, pt = init()
+def init_context(screen, clock, pt):
+    global D
     d = display.Display(screen, D.__contains__, 89, 144)
     d.register_commands(D)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
@@ -82,9 +78,29 @@ def main():
     loop = core.TheLoop(d, clock)
     stack_id, stack_holder = pt.open('stack.pickle')
     world = core.World(stack_id, stack_holder, D, d.broadcast, log)
+    return locals()
+
+
+d = None # To have a reference to it in the IDLE shell window.
+def main():
+    global d
+    screen, clock, pt = init()
+    name_space = init_context(screen, clock, pt)
+    loop = name_space['loop']
+    d = name_space['d']
+    world = name_space['world']
     loop.install_task(pt.task_run, 10000)  # save files every ten seconds
     d.handlers.append(pt.handle)
     d.handlers.append(world.handle)
+
+    @SimpleFunctionWrapper
+    def evaluate(stack):
+        code, stack = stack
+        assert isinstance(code, str), repr(code)
+        exec code in {}, name_space
+        return stack
+    D['evaluate'] = evaluate
+        
     error_guard(loop.loop)
 
 

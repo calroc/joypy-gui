@@ -452,7 +452,7 @@ class TextViewer(MenuViewer):
             return ''
         srow, scolumn, erow, ecolumn = self._selection_coords()
         if srow == erow:
-            return self.lines[srow][scolumn:ecolumn]
+            return str(self.lines[srow][scolumn:ecolumn])
         lines = []
         assert srow < erow
         while srow <= erow:

@@ -36,9 +36,11 @@ Still to do:
 * Horizontal scrolling w/ scrollbar?
 * Pgup/down keys?
 * Tab key?
+* If you have a viewer on an unstored string(list) need a way to name and persist it.
 
 Done:
 - open a resource list
+- Open a viewer on a (unstored) string
 - Selecting text
 -   Copy and Cut
 -   Paste
