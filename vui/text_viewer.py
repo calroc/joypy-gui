@@ -132,8 +132,6 @@ class TextViewer(MenuViewer):
                 self.y -= 1
                 self.x = min(self.x, len(self.v.lines[self.y]))
                 self.draw()
-                if self.y < self.v.at_line:
-                    self.v.scroll_down()
 
         def down(self, mod):
             if self.y < len(self.v.lines) - 1:
@@ -141,8 +139,7 @@ class TextViewer(MenuViewer):
                 self.y += 1
                 self.x = min(self.x, len(self.v.lines[self.y]))
                 self.draw()
-                if self.y > self.v.at_line + self.v.h_in_lines :
-                    self.v.scroll_up()
+                self._check_scroll()
 
         def left(self, mod):
             if self.x:
@@ -154,8 +151,7 @@ class TextViewer(MenuViewer):
                 self.y -= 1
                 self.x = len(self.v.lines[self.y])
                 self.draw()
-                if self.y < self.v.at_line:
-                    self.v.scroll_down()
+                self._check_scroll()
 
         def right(self, mod):
             if self.x < len(self.v.lines[self.y]):
@@ -167,7 +163,12 @@ class TextViewer(MenuViewer):
                 self.y += 1
                 self.x = 0
                 self.draw()
-                if self.y > self.v.at_line + self.v.h_in_lines :
+                self._check_scroll()
+
+        def _check_scroll(self):
+                if self.y < self.v.at_line:
+                    self.v.scroll_down()
+                elif self.y > self.v.at_line + self.v.h_in_lines:
                     self.v.scroll_up()
 
     def __init__(self, surface):
@@ -373,8 +374,8 @@ class TextViewer(MenuViewer):
         if key in ARROW_KEYS:
             self._arrow_key(key, mod)
             return
-        line, i = self.lines[self.cursor.y], self.cursor.x
 
+        line, i = self.lines[self.cursor.y], self.cursor.x
         modified = ()
         if key == pygame.K_RETURN:
             self._return_key(mod, line, i)
