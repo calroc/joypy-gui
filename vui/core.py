@@ -93,30 +93,28 @@ class World(object):
         self.log_id = log.content_id
 
     def handle(self, message):
+        if (isinstance(message, ModifyMessage)
+            and message.subject is self.stack_holder
+            ):
+            self._log_lines('', '%s <-' % self.format_stack())
         if not isinstance(message, CommandMessage):
             return
         c, s, d = message.command, self.stack_holder[0], self.dictionary
         self.stack_holder[0], _, self.dictionary = run(c, s, d)
+        self._log_lines('', '-> %s' % (c,))
         mm = ModifyMessage(self, self.stack_holder, content_id=self.stack_id)
         self.notify(mm)
-        self.log.extend(self.format_log_output(c))
-        mm = ModifyMessage(self, self.log, content_id=self.log_id)
-        self.notify(mm)
 
-    def format_log_output(self, command):
-        err = None
+    def _log_lines(self, *lines):
+        self.log.extend(lines)
+        self.notify(ModifyMessage(self, self.log, content_id=self.log_id))
+
+    def format_stack(self):
         try:
-            s = stack_to_string(self.stack_holder[0])
+            return stack_to_string(self.stack_holder[0])
         except:
-            err = format_exc()
-            s = str(self.stack_holder[0])
-        if err:
-            print >> stderr, err
-        return ('''
--> %s
-
-%s <-
-''' % (command, s)).splitlines()
+            print >> stderr, format_exc()
+            return str(self.stack_holder[0])
 
 
 # main loop

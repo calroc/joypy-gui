@@ -417,6 +417,8 @@ class TextViewer(MenuViewer):
         if om.status == SUCCESS:
             selection = self._get_selection()
             om.thing[0] = selection, om.thing[0]
+            display.broadcast(ModifyMessage(
+                self, om.thing, content_id=om.content_id))
             return True
 
     def _cut_selection(self, display):

@@ -27,7 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Copy/Cut update log
 * StackViewer
 * Capture and display tracebacks
 * System query for most recent selection
@@ -39,9 +38,12 @@ Still to do:
 * Pgup/down keys?
 * Tab key?
 * If you have a viewer on an unstored string(list) need a way to name and persist it.
+* When moving viewers sometimes a command gets executed from the underlying
+    viewer.  This shouldn't happen.
 
 Done:
-- open a resource list
+- Update log when stack changes
+- Open a resource list
 - Open a viewer on a (unstored) string
 - Selecting text
 -   Copy and Cut
