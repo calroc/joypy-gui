@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 import os, pickle, sys, traceback
-
-# To enable "hot" reloading in the IDLE shell.
-for name in 'core display viewer text_viewer stack_viewer persist_task'.split():
-    try:
-        del sys.modules[name]
-    except KeyError:
-        pass
-
 import pygame
 from joy.library import initialize, DefinitionWrapper, SimpleFunctionWrapper
-from joy.utils.stack import list_to_stack
 import core, display, text_viewer, persist_task
 
 
@@ -25,7 +16,6 @@ if JOY_HOME is None:
 
 
 def init_text(display, pt, x, y, title, filename):
-    # TODO eventually title should go in the menu?
     viewer = display.open_viewer(x, y, text_viewer.TextViewer)
     viewer.content_id, viewer.lines = pt.open(filename)
     viewer.draw()
@@ -39,25 +29,7 @@ def load_definitions(pt, dictionary):
             DefinitionWrapper.add_def(line, dictionary)
 
 
-D = initialize()
-
-@SimpleFunctionWrapper
-def splitlines(stack):
-    text, stack = stack
-    assert isinstance(text, str), repr(text)
-    return list_to_stack(text.splitlines()), stack
-D['splitlines'] = splitlines
-
-try:
-    A = A
-except NameError:
-    A = None
-
-
 def init():
-    global A
-    if A:
-        return A
     print 'Initializing Pygame...'
     pygame.init()
     print 'Creating window...'
@@ -69,9 +41,28 @@ def init():
     pygame.event.set_allowed(None)
     pygame.event.set_allowed(core.ALLOWED_EVENTS)
     pt = persist_task.PersistTask(JOY_HOME)
+    return screen, clock, pt
+
+
+def init_context(screen, clock, pt):
+    D = initialize()
+    d = display.Display(
+        screen,
+        D.__contains__,
+        *((144 - 89, 144, 89) if FULLSCREEN else (89, 144))
+        )
+    d.register_commands(D)
     pt.register_commands(D)
-    A = screen, clock, pt
-    return A
+    log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
+    t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
+    loop = core.TheLoop(d, clock)
+    stack_id, stack_holder = pt.open('stack.pickle')
+    world = core.World(stack_id, stack_holder, D, d.broadcast, log)
+    loop.install_task(pt.task_run, 10000)  # save files every ten seconds
+    d.handlers.append(pt.handle)
+    d.handlers.append(world.handle)
+    load_definitions(pt, D)
+    return locals()
 
 
 def error_guard(loop, n=10):
@@ -85,43 +76,21 @@ def error_guard(loop, n=10):
             error_count += 1
 
 
-def init_context(screen, clock, pt):
-    tracks = (144 - 89, 144, 89) if FULLSCREEN else (89, 144)
-    d = display.Display(screen, D.__contains__, *tracks)
-    d.register_commands(D)
-    log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
-    t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
-    loop = core.TheLoop(d, clock)
-    stack_id, stack_holder = pt.open('stack.pickle')
-    world = core.World(stack_id, stack_holder, D, d.broadcast, log)
-    return locals()
-
-
-d = None # To have a reference to it in the IDLE shell window.
-def main():
-    global d
-    screen, clock, pt = init()
+def main(screen, clock, pt):
     name_space = init_context(screen, clock, pt)
-    name_space['D'] = D
-    loop = name_space['loop']
-    d = name_space['d']
-    world = name_space['world']
-    loop.install_task(pt.task_run, 10000)  # save files every ten seconds
-    d.handlers.append(pt.handle)
-    d.handlers.append(world.handle)
 
     @SimpleFunctionWrapper
     def evaluate(stack):
         code, stack = stack
-        assert isinstance(code, str), repr(code)
         exec code in name_space.copy()
         return stack
-    D['evaluate'] = evaluate
 
-    load_definitions(pt, D)
+    name_space['D']['evaluate'] = evaluate
 
-    error_guard(loop.loop)
+    error_guard(name_space['loop'].loop)
+
+    return name_space['d']
 
 
 if __name__ == '__main__':
-    main()
+    main(*init())
