@@ -70,8 +70,9 @@ class Display(object):
     and reveals the hidden tracks (and their viewers, if any.)
     '''
 
-    def __init__(self, screen, *track_ratios):
+    def __init__(self, screen, lookup, *track_ratios):
         self.screen = screen
+        self.lookup = lookup
         self.w, self.h = screen.get_width(), screen.get_height()
         self.focused_viewer = None
         self.tracks = []  # (x, track)

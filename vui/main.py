@@ -68,7 +68,7 @@ d = None
 def main():
     global d
     screen, clock, pt = init()
-    d = display.Display(screen, 89, 144)
+    d = display.Display(screen, D.__contains__, 89, 144)
     loop = TheLoop(d, clock)
     content_id, stack_holder = pt.open('stack.pickle')
     world = World(stack_holder, D, d.broadcast, content_id)

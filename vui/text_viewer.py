@@ -76,20 +76,20 @@ class TextViewer(MenuViewer):
             self.draw()
 
         def draw(self):
-            r = self.x * FONT.char_w, self.screen_y, self.w, self.h
+            r = self.x * FONT.char_w, self.screen_y(), self.w, self.h
             self.mem.blit(self.v.body_surface, (0, 0), r)
             self.v.body_surface.fill(FG, r)
             self.can_fade = True
 
         def fade(self):
             if self.can_fade:
-                dest = self.x * FONT.char_w, self.screen_y
+                dest = self.x * FONT.char_w, self.screen_y()
                 self.v.body_surface.blit(self.mem, dest)
                 self.can_fade = False
 
-        @property
-        def screen_y(self):
-            return (self.y - self.v.at_line) * FONT.line_h
+        def screen_y(self, row=None):
+            if row is None: row = self.y
+            return (row - self.v.at_line) * FONT.line_h
 
         def up(self, mod):
             if self.y:
@@ -146,13 +146,18 @@ class TextViewer(MenuViewer):
     def scroll_up(self):
         if self.at_line < len(self.lines) - 1:
             self.at_line += 1
-            self.draw_body()
+            self.body_surface.scroll(0, -FONT.line_h)
+            row = self.h_in_lines + self.at_line
+            self._redraw_line(row)
+            self._redraw_line(row + 1)
             self.cursor.draw()
 
     def scroll_down(self):
         if self.at_line:
             self.at_line -= 1
-            self.draw_body()
+            self.body_surface.scroll(0, FONT.line_h)
+            self._redraw_line(self.at_line)
+            self._redraw_line(self.at_line + 1)
             self.cursor.draw()
 
     def resurface(self, surface):
@@ -186,6 +191,15 @@ class TextViewer(MenuViewer):
         surface = FONT.render(line[:self.line_w])
         self.body_surface.blit(surface, (0, y))
 
+    def _redraw_line(self, row):
+        try: line = self.lines[row]
+        except IndexError: line = ' ' * self.line_w
+        else:
+            n = self.line_w - len(line)
+            if n > 0: line = line + ' ' * n
+        y = self.cursor.screen_y(row)
+        self.draw_line(y, line)
+
     def focus(self):
         self.cursor.v = self
         self.cursor.draw()
@@ -195,24 +209,43 @@ class TextViewer(MenuViewer):
 
     def body_click(self, display, x, y, button):
         if button == 1:
-            i, line, index = self.at(x, y)
-            self.cursor.set_to(index, i)
+            line, column, row = self.at(x, y)
+            self.cursor.set_to(column, row)
         elif button == 2:
-            self.scroll_down()
+            if pygame.KMOD_SHIFT & pygame.key.get_mods():
+                self.scroll_up()
+            else:
+                self.scroll_down()
         elif button == 3:
-            self.scroll_up()
+            self.command_down(display, x, y)
+        elif button == 4: self.scroll_down()
+        elif button == 5: self.scroll_up()
+        else:
+            print button
+
+
+    def command_down(self, display, x, y):
+        # figure out the word under the mouse, if any
+        # if display.lookup(word):
+        #     underline the word
+        #     self.command = word, 
+        pass
 
     def at(self, x, y):
-        i = self.at_line + y / FONT.line_h
+        '''
+        Given screen coordinates return the line, row, and column of the
+        character there.
+        '''
+        row = self.at_line + y / FONT.line_h
         try:
-            line = self.lines[i]
+            line = self.lines[row]
         except IndexError:
-            i = len(self.lines) - 1
-            line = self.lines[i]
-            index = len(line)
+            row = len(self.lines) - 1
+            line = self.lines[row]
+            column = len(line)
         else:
-            index = min(x / FONT.char_w, len(line))
-        return i, line, index
+            column = min(x / FONT.char_w, len(line))
+        return line, column, row
 
     def menu_click(self, display, x, y, button):
         if MenuViewer.menu_click(self, display, x, y, button):
@@ -231,7 +264,7 @@ class TextViewer(MenuViewer):
             and self.body_rect.collidepoint(x, y)
             ):
             bx, by = self.body_rect.topleft
-            row, line, column = self.at(x - bx, y - by)
+            line, column, row = self.at(x - bx, y - by)
             self.cursor.set_to(column, row)
 
     def key_down(self, display, uch, key, mod):
@@ -268,7 +301,7 @@ class TextViewer(MenuViewer):
         self.lines[self.cursor.y] = line
         self.cursor.fade()
         self.cursor.x += 1
-        self.draw_line(self.cursor.screen_y, line)
+        self.draw_line(self.cursor.screen_y(), line)
         self.cursor.draw()
 
     def _backspace_key(self, mod, line, i):
@@ -278,7 +311,7 @@ class TextViewer(MenuViewer):
             self.lines[self.cursor.y] = line
             self.cursor.fade()
             self.cursor.x -= 1
-            self.draw_line(self.cursor.screen_y, line + ' ')
+            self.draw_line(self.cursor.screen_y(), line + ' ')
             self.cursor.draw()
             res = True
         elif self.cursor.y:
@@ -298,7 +331,7 @@ class TextViewer(MenuViewer):
             line = line[:i] + line[i + 1:]
             self.lines[self.cursor.y] = line
             self.cursor.fade()
-            self.draw_line(self.cursor.screen_y, line + ' ')
+            self.draw_line(self.cursor.screen_y(), line + ' ')
             self.cursor.draw()
             res = True
         elif self.cursor.y < len(self.lines) - 1:
