@@ -27,7 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* StackViewer
 * Capture and display tracebacks
 * System query for most recent selection
 * Home/End keys
@@ -42,6 +41,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- StackViewer
 - Update log when stack changes
 - Open a resource list
 - Open a viewer on a (unstored) string
@@ -67,7 +67,7 @@ from joy.library import SimpleFunctionWrapper
 from core import (OpenMessage, SUCCESS,
     BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS)
 from viewer import Viewer
-import text_viewer
+import text_viewer, stack_viewer
 
 
 class Display(object):
@@ -114,7 +114,9 @@ class Display(object):
         return the viewer.
         '''
         track = self._track_at(x)[0]
-        return track.open_viewer(y, class_)
+        V = track.open_viewer(y, class_)
+        V.focus(self)
+        return V
 
     def close_viewer(self, viewer):
         '''Close the viewer.'''
@@ -266,6 +268,13 @@ class Display(object):
             return stack
 
         @SimpleFunctionWrapper
+        def open_stack(stack):
+            (x, (y, _)), stack = stack
+            V = self.open_viewer(x, y, stack_viewer.StackViewer)
+            V.draw()
+            return stack
+
+        @SimpleFunctionWrapper
         def open_resource(stack):
             ((x, (y, _)), (name, stack)) = stack
             om = OpenMessage(self, name)
@@ -278,6 +287,7 @@ class Display(object):
 
         D['good_viewer_location'] = good_viewer_location
         D['open_viewer'] = open_viewer
+        D['open_stack'] = open_stack
         D['open_resource'] = open_resource
 
     def done_resizing(self):
@@ -304,7 +314,7 @@ class Display(object):
         elif viewer is not self.focused_viewer:
             if self.focused_viewer: self.focused_viewer.unfocus()
             self.focused_viewer = viewer
-            viewer.focus()
+            viewer.focus(self)
 
     def dispatch_event(self, event):
         '''

@@ -1,6 +1,6 @@
 import string
 import pygame
-from joy.utils.stack import stack_to_string
+from joy.utils.stack import expression_to_string
 from core import (
     ARROW_KEYS,
     BACKGROUND as BG,
@@ -31,6 +31,12 @@ def _is_command(display, word):
     return display.lookup(word) or word.isdigit() or all(
         not s or s.isdigit() for s in word.split('.', 1)
         ) and len(word) > 1
+
+
+def format_stack_item(content):
+    if isinstance(content, tuple):
+        return '[%s]' % expression_to_string(content)
+    return str(content)
 
 
 class Font(object):
@@ -225,7 +231,7 @@ class TextViewer(MenuViewer):
 
     # General Functionality
 
-    def focus(self):
+    def focus(self, display):
         self.cursor.v = self
         self.cursor.draw()
 
@@ -598,21 +604,17 @@ class TextViewer(MenuViewer):
             self.cursor.draw()
 
     def _insert_key(self, display, mod, line, i):
-            om = OpenMessage(self, 'stack.pickle')
-            display.broadcast(om)
-            if om.status != SUCCESS:
-                return
-            stack = om.thing[0]
-            if stack:
-                content = stack[0]
-                if isinstance(content, tuple):
-                    content = '[%s]' % stack_to_string(s)
-                else:
-                    content = str(content)
-                if self.insert(content):
-                    if mod & pygame.KMOD_SHIFT:
-                        display.broadcast(CommandMessage(self, 'pop'))
-                    return True
+        om = OpenMessage(self, 'stack.pickle')
+        display.broadcast(om)
+        if om.status != SUCCESS:
+            return
+        stack = om.thing[0]
+        if stack:
+            content = format_stack_item(stack[0])
+            if self.insert(content):
+                if mod & pygame.KMOD_SHIFT:
+                    display.broadcast(CommandMessage(self, 'pop'))
+                return True
 
     def insert(self, content):
         assert isinstance(content, basestring), repr(content)
@@ -627,9 +629,6 @@ class TextViewer(MenuViewer):
             self.cursor.x = len(lines[-1]) - len(line) + column
             self.cursor.draw()
             return True
-
-
-
 
 
 

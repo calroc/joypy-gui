@@ -66,7 +66,7 @@ class Viewer(object):
     def close(self):
         '''Close the viewer and release any resources, etc...'''
 
-    def focus(self):
+    def focus(self, display):
         pass
 
     def unfocus(self):
