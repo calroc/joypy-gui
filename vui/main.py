@@ -9,9 +9,6 @@ reload(text_viewer)
 from core import TheLoop, ALLOWED_EVENTS
 from persist_task import PersistTask
 
-from dulwich.errors import NotGitRepository
-from dulwich.repo import Repo
-
 from joy.utils.stack import stack_to_string
 from joy.library import initialize
 
@@ -20,31 +17,7 @@ JOY_HOME = os.environ.get('JOY_HOME')
 if JOY_HOME is None:
     JOY_HOME = os.path.expanduser('~/.joypy')
     if not os.path.isabs(JOY_HOME):
-        JOY_HOME = os.path.abspath('./JOY_HOME')
-
-if not os.path.exists(JOY_HOME):
-    os.makedirs(JOY_HOME, 0700)
-    repo = Repo.init(JOY_HOME)
-else:  # path does exist
-    try:
-        repo = Repo(JOY_HOME)
-    except NotGitRepository:
-        repo = Repo.init(JOY_HOME)
-
-
-def repo_relative_path(path):
-    return os.path.relpath(
-        path,
-        os.path.commonprefix((repo.controldir(), path))
-        )
-
-
-STACK_FN = os.path.join(JOY_HOME, 'stack.pickle')
-JOY_FN = os.path.join(JOY_HOME, 'scratch.txt')
-LOG_FN = os.path.join(JOY_HOME, 'log.txt')
-
-
-#relative_STACK_FN = repo_relative_path(STACK_FN)
+        raise ValueError('what directory?')
 
 
 def load_stack():
@@ -71,7 +44,6 @@ def save_stack():
 def init_text(pt, viewer, title, filename):
     viewer.content_id, viewer.lines = pt.open(filename)
     viewer.draw()
-#    repo_relative_filename = repo_relative_path(filename)
 
 
 ##D = initialize()
@@ -122,7 +94,7 @@ def main():
     log = d.open_viewer(0, 0, text_viewer.TextViewer)
     init_text(pt, log, 'Log', 'log.txt')
     t = d.open_viewer(d.w / 2, 0, text_viewer.TextViewer)
-    init_text(pt, t, 'Joy - ' + JOY_HOME, 'scratch.txt')
+    init_text(pt, t, 'Joy', 'scratch.txt')
     error_guard(loop.loop)
 
 

@@ -27,7 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Persistance of data
 * Joy integration
 * Command evaluation
   * Menu text, commands and name or title
@@ -41,6 +40,7 @@ Still to do:
 * Tab key?
 
 Done:
+- Persistance of data
 - Content change notification
 - Vertical scrolling w/ keys
 - Enter/return key

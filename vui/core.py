@@ -3,6 +3,9 @@ from traceback import format_exc
 import pygame
 
 
+COMMITTER = 'Simon Forman <forman.simon@gmail.com>'
+
+
 BLACK = FOREGROUND = 0, 0, 0
 GREY = 127, 127, 127
 WHITE = BACKGROUND = 255, 255, 255
