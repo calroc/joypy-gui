@@ -27,7 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* A way to open a default viewer (in case you close them all.)
 * Return key can orphan a line at the bottom of a viewer.
 * Redirect stdout to "print" to the log.
 * Calculator buttons on the numpad?
@@ -43,6 +42,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- Pause/Break to open a trap viewer (in case you close them all.)
 - "shutdown" signal to tell PT to commit outstanding changes.
 - Local library auto-loaded at start-time
   - library.py, primitives in Python
@@ -397,6 +397,11 @@ class Display(object):
             open_viewer_on_string(self, err, self.broadcast)
 
     def _keyboard_event(self, event):
+        if event.key == pygame.K_PAUSE and event.type == pygame.KEYUP:
+            # At least on my keyboard the break/pause key sends K_PAUSE.
+            # The main use of this is to open a TextViewer if you
+            # accidentally close all the viewers, so you can recover.
+            raise KeyboardInterrupt('break')
         if not self.focused_viewer:
             return
         if event.type == pygame.KEYUP:
