@@ -27,6 +27,11 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
+* Return key can orphan a line at the bottom of a viewer.
+* Redirect stdout to "print" to the log.
+* Calculator buttons on the numpad?
+* A way to open a default viewer (in case you close them all.)
+* A way to view docs/definition for a command.
 * Local library auto-loaded at start-time
   * primitives in Python
   * definitions
@@ -72,8 +77,17 @@ from sys import stderr
 from traceback import format_exc
 import pygame
 from joy.library import DefinitionWrapper, SimpleFunctionWrapper
-from core import (OpenMessage, CommandMessage, SUCCESS,
-    push, BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS)
+from core import (
+    CommandMessage,
+    OpenMessage,
+    PersistMessage,
+    SUCCESS,
+    open_viewer_on_string,
+    BACKGROUND,
+    FOREGROUND,
+    GREY,
+    MOUSE_EVENTS,
+    )
 from viewer import Viewer
 import text_viewer, stack_viewer
 
@@ -92,15 +106,25 @@ class Display(object):
     created that overlays or hides one or two existing tracks, and when
     the last viewer in an overlay track is closed the track closes too
     and reveals the hidden tracks (and their viewers, if any.)
+
+    In order to facilitate command underlining while mouse dragging the
+    lookup parameter must be a function that accepts a string and returns
+    a Boolean indicating whether that string is a valid Joy function name.
+    Typically you pass in the __contains__ method of the Joy dict.  This
+    is a case of breaking "loose coupling" to gain efficiency, as otherwise
+    we would have to e.g. send some sort of lookup message to the
+    World context object, going through the whole Display.broadcast()
+    machinery, etc.  Not something you want to do on each MOUSEMOTION
+    event.
     '''
 
     def __init__(self, screen, lookup, *track_ratios):
         self.screen = screen
-        self.lookup = lookup
         self.w, self.h = screen.get_width(), screen.get_height()
+        self.lookup = lookup
         self.focused_viewer = None
         self.tracks = []  # (x, track)
-        self.handlers = []
+        self.handlers = [] # Non-viewers that should receive messages.
         # Create the tracks.
         if not track_ratios: track_ratios = 1, 4
         x, total = 0, sum(track_ratios)
@@ -161,7 +185,7 @@ class Display(object):
         actually creates a new copy and a new track to hold it.  The old
         tracks and viewers are retained, and they get restored when the
         covering track closes, which happens automatically when the last
-        viewer in that track is closed.
+        viewer in the covering track is closed.
         '''
         for x, track in self.tracks:
             for _, V in track.viewers:
@@ -294,6 +318,25 @@ class Display(object):
             return stack
 
         @SimpleFunctionWrapper
+        def name_viewer(stack):
+            name, stack = stack
+            assert isinstance(name, str), repr(name)
+            if self.focused_viewer and not self.focused_viewer.content_id:
+                self.focused_viewer.content_id = name
+                pm = PersistMessage(self, name, thing=self.focused_viewer.lines)
+                self.broadcast(pm)
+                self.focused_viewer.draw_menu()
+            return stack
+
+        @SimpleFunctionWrapper
+        def persist_viewer(stack):
+            if self.focused_viewer:
+                
+                self.focused_viewer.content_id = name
+                self.focused_viewer.draw_menu()
+            return stack
+
+        @SimpleFunctionWrapper
         def inscribe(stack):
             definition, stack = stack
             DefinitionWrapper.add_def(definition, D)
@@ -303,10 +346,11 @@ class Display(object):
         D['open_viewer'] = open_viewer
         D['open_stack'] = open_stack
         D['open_resource'] = open_resource
+        D['name_viewer'] = name_viewer
         D['inscribe'] = inscribe
 
     def done_resizing(self):
-        for _, track in self.tracks:
+        for _, track in self.tracks: # This should be done by a Message?
             if track.resizing_viewer:
                 track.resizing_viewer.draw()
                 track.resizing_viewer = None
@@ -376,10 +420,8 @@ class Display(object):
         # Catch all exceptions and open a viewer.
         except:
             err = format_exc()
-            print >> stderr, err # Too be safe, just print it right away.
-            push(self, err, self.broadcast)
-            command = 'good_viewer_location open_viewer'
-            self.broadcast(CommandMessage(self, command))
+            print >> stderr, err # To be safe just print it right away.
+            open_viewer_on_string(self, err, self.broadcast)
 
 
 class Track(Viewer):

@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 import os, pickle, sys, traceback
 
+# To enable "hot" reloading in the IDLE shell.
+for name in 'core display viewer text_viewer stack_viewer persist_task'.split():
+    try:
+        del sys.modules[name]
+    except KeyError:
+        pass
+
 import pygame
 import core
 #reload(core)

@@ -27,10 +27,10 @@ def foo(repo):
 
 class Resource(object):
 
-    def __init__(self, filename, repo_relative_filename):
+    def __init__(self, filename, repo_relative_filename, thing=None):
         self.filename = filename
         self.repo_relative_filename = repo_relative_filename
-        self.thing = self._from_file(open(filename))
+        self.thing = thing or self._from_file(open(filename))
 
     def _from_file(self, f):
         return f.read().splitlines()
@@ -86,6 +86,8 @@ class PersistTask(object):
             self.handle_open(message)
         elif isinstance(message, core.ModifyMessage):
             self.handle_modify(message)
+        elif isinstance(message, core.PersistMessage):
+            self.handle_persist(message)
 
     def handle_open(self, message):
         try:
@@ -107,6 +109,23 @@ class PersistTask(object):
         if self.counter[content_id] > self.LIMIT:
             self.persist(content_id)
             self.commit('due to activity')
+
+    def handle_persist(self, message):
+        try:
+            resource = self.store[message.content_id]
+        except KeyError:
+            resource = self.handle_persist_new(message)
+        resource.persist(self.repo)
+        self.commit('by request from %r' % (message.sender,))
+
+    def handle_persist_new(self, message):
+        name = message.content_id
+        check_filename(name)
+        fn = os.path.join(self.home, name)
+        thing = message.details['thing']
+        R = PickledResource if name.endswith('.pickle') else Resource # !!! refactor!
+        resource = self.store[name] = R(fn, self._r(fn), thing)
+        return resource
 
     def persist(self, content_id):
         del self.counter[content_id]
@@ -136,6 +155,15 @@ class PersistTask(object):
             return '\n'.join(self.scan()), stack
 
         D['list_resources'] = list_resources
+        
+
+
+def check_filename(name):
+    if len(name) > 64:
+        raise ValueError('bad name %r' % (name,))
+    left, dot, right = name.partition('.')
+    if not left.isalnum() or dot and not right.isalnum():
+        raise ValueError('bad name %r' % (name,))
         
 
 

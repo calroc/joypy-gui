@@ -79,6 +79,13 @@ class OpenMessage(Message):
         self.traceback = None
 
 
+class PersistMessage(Message):
+    def __init__(self, sender, content_id, **details):
+        Message.__init__(self, sender)
+        self.content_id = content_id
+        self.details = details
+
+
 # Joy Interpreter & Context
 
 
@@ -100,8 +107,8 @@ class World(object):
         if not isinstance(message, CommandMessage):
             return
         c, s, d = message.command, self.stack_holder[0], self.dictionary
-        self.stack_holder[0], _, self.dictionary = run(c, s, d)
         self._log_lines('', '-> %s' % (c,))
+        self.stack_holder[0], _, self.dictionary = run(c, s, d)
         mm = ModifyMessage(self, self.stack_holder, content_id=self.stack_id)
         self.notify(mm)
 
@@ -124,6 +131,11 @@ def push(sender, item, notify, stack_name='stack.pickle'):
         om.thing[0] = item, om.thing[0]
         notify(ModifyMessage(sender, om.thing, content_id=om.content_id))
     return om.status
+
+
+def open_viewer_on_string(sender, content, notify):
+    push(sender, content, notify)
+    notify(CommandMessage(sender, 'good_viewer_location open_viewer'))
 
 
 # main loop
@@ -165,9 +177,9 @@ class TheLoop(object):
         except:
             traceback = format_exc()
             self.remove_task(task_event_id)
-            # TODO: when we can open a textviewer and load any ol' text, do that instead.
             print >> stderr, traceback
             print >> stderr, 'TASK removed due to ERROR', task
+            open_viewer_on_string(self, traceback, self.display.broadcast)
 
     def loop(self):
         self.running = True
