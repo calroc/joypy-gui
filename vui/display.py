@@ -27,8 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Reverse video menu bars
-* Inscribe function
 * Local library auto-loaded at start-time
   * primitives in Python
   * definitions
@@ -45,6 +43,8 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- Inscribe function
+- Reverse video, well, grey background, menu bars
 - PT scans JOY_HOME for resource lists
 - Capture and display tracebacks
 - StackViewer
@@ -71,7 +71,7 @@ from copy import copy
 from sys import stderr
 from traceback import format_exc
 import pygame
-from joy.library import SimpleFunctionWrapper
+from joy.library import DefinitionWrapper, SimpleFunctionWrapper
 from core import (OpenMessage, CommandMessage, SUCCESS,
     push, BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS)
 from viewer import Viewer
@@ -293,10 +293,17 @@ class Display(object):
                 V.draw()
             return stack
 
+        @SimpleFunctionWrapper
+        def inscribe(stack):
+            definition, stack = stack
+            DefinitionWrapper.add_def(definition, D)
+            return stack
+
         D['good_viewer_location'] = good_viewer_location
         D['open_viewer'] = open_viewer
         D['open_stack'] = open_stack
         D['open_resource'] = open_resource
+        D['inscribe'] = inscribe
 
     def done_resizing(self):
         for _, track in self.tracks:
