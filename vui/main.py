@@ -41,9 +41,12 @@ def save_stack():
     #print >> sys.stderr, commit_id
 
 
-def init_text(pt, viewer, title, filename):
+def init_text(display, pt, x, y, title, filename):
+    # TODO eventually title should go in the menu?
+    viewer = display.open_viewer(x, y, text_viewer.TextViewer)
     viewer.content_id, viewer.lines = pt.open(filename)
     viewer.draw()
+    return viewer
 
 
 ##D = initialize()
@@ -91,10 +94,8 @@ def main():
     loop = TheLoop(d, clock)
     loop.install_task(pt.task_run, 2000)  # save files every two seconds
     d.handlers.append(pt.handle)
-    log = d.open_viewer(0, 0, text_viewer.TextViewer)
-    init_text(pt, log, 'Log', 'log.txt')
-    t = d.open_viewer(d.w / 2, 0, text_viewer.TextViewer)
-    init_text(pt, t, 'Joy', 'scratch.txt')
+    log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
+    t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
     error_guard(loop.loop)
 
 
