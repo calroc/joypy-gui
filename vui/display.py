@@ -27,8 +27,11 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* PT should scan JOY_HOME for resources at startup.
+* Reverse video menu bars
 * Inscribe function
+* Local library auto-loaded at start-time
+  * primitives in Python
+  * definitions
 * System query for most recent selection
 * Home/End keys
 * Vertical scrolling w/ scrollbar
@@ -42,6 +45,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- PT scans JOY_HOME for resource lists
 - Capture and display tracebacks
 - StackViewer
 - Update log when stack changes

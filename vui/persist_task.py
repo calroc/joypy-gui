@@ -122,11 +122,18 @@ class PersistTask(object):
     def commit(self, message='auto-commit'):
         return self.repo.do_commit(message, committer=core.COMMITTER)
 
+    def scan(self):
+        return sorted([
+            fn
+            for fn in os.listdir(self.home)
+            if os.path.isfile(os.path.join(self.home, fn))
+            ])
+
     def register_commands(self, D):
 
         @SimpleFunctionWrapper
         def list_resources(stack):
-            return '\n'.join(sorted(self.store)), stack
+            return '\n'.join(self.scan()), stack
 
         D['list_resources'] = list_resources
         

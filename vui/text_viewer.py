@@ -207,8 +207,13 @@ class TextViewer(MenuViewer):
         self.surface.blit(self.CLOSE_TEXT,
                           (self.w - 2 - self.close_rect.w, 1))
         if self.content_id:
-            self.surface.blit(FONT.render(self.content_id),
+            self.surface.blit(FONT.render('| ' + self.content_id),
                           (self.grow_rect.w + FONT.char_w + 3, 1))
+        self.surface.fill( # light grey background
+            (196, 196, 196),
+            (0, 0, self.w - 1, self.MINIMUM_HEIGHT),
+            pygame.BLEND_MULT
+            )
         
 
     def draw_body(self):

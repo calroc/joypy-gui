@@ -3,13 +3,13 @@ import os, pickle, sys, traceback
 
 import pygame
 import core
-#reload(core)
+reload(core)
 import display
-#reload(display)
+reload(display)
 import text_viewer
-#reload(text_viewer)
+reload(text_viewer)
 import persist_task
-#reload(persist_task)
+reload(persist_task)
 
 from joy.library import initialize, SimpleFunctionWrapper
 
