@@ -14,6 +14,9 @@ import persist_task
 from joy.library import initialize, SimpleFunctionWrapper
 
 
+FULLSCREEN = '-f' in sys.argv
+
+
 JOY_HOME = os.environ.get('JOY_HOME')
 if JOY_HOME is None:
     JOY_HOME = os.path.expanduser('~/.joypy')
@@ -48,7 +51,10 @@ def init():
     print 'Initializing Pygame...'
     pygame.init()
     print 'Creating window...'
-    screen = pygame.display.set_mode((1024, 768))
+    if FULLSCREEN:
+        screen = pygame.display.set_mode()
+    else:
+        screen = pygame.display.set_mode((1024, 768))
     clock = pygame.time.Clock()
     pygame.event.set_allowed(None)
     pygame.event.set_allowed(core.ALLOWED_EVENTS)
@@ -70,7 +76,8 @@ def error_guard(loop, n=10):
 
 
 def init_context(screen, clock, pt):
-    d = display.Display(screen, D.__contains__, 89, 144)
+    tracks = (1, 1, 1, 1, 1) if FULLSCREEN else (89, 144)
+    d = display.Display(screen, D.__contains__, *tracks)
     d.register_commands(D)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
     t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
