@@ -157,6 +157,7 @@ class MenuViewer(Viewer):
             if self.resizing == 2:
                 self.resizing = 0
                 self.draw()
+                display.done_resizing()
             self.resizing = 0
             return True
 

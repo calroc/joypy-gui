@@ -228,6 +228,13 @@ class Display(object):
         viewer, y = track.viewer_at(y)
         return viewer, x, y
 
+    def done_resizing(self):
+        for _, track in self.tracks:
+            if track.resizing_viewer:
+                track.resizing_viewer.draw()
+                track.resizing_viewer = None
+                break
+
     def broadcast(self, message):
         for _, track in self.tracks:
             track.broadcast(message)
@@ -295,6 +302,7 @@ class Track(Viewer):
         Viewer.__init__(self, surface)
         self.viewers = []  # (y, viewer)
         self.hiding = None
+        self.resizing_viewer = None
         self.draw()
 
     def split(self, y):
@@ -397,7 +405,10 @@ class Track(Viewer):
                 previous_y, previous_viewer = self.viewers[i - 1]
                 if new_y - previous_y < self.MINIMUM_HEIGHT:
                     return
+                previous_viewer.resizing = 1
                 h = previous_viewer.split(new_y - previous_y)
+                previous_viewer.resizing = 0
+                self.resizing_viewer = previous_viewer
             else:
                 h = old_y - new_y
             self._grow_by(viewer, new_y, h)
@@ -416,7 +427,10 @@ class Track(Viewer):
             self._grow_by(viewer, new_y, -h) # grow by negative height!
             if i:
                 previous_y, previous_viewer = self.viewers[i - 1]
+                previous_viewer.resizing = 1
                 self._grow_by(previous_viewer, previous_y, h)
+                previous_viewer.resizing = 0
+                self.resizing_viewer = previous_viewer
             else:
                 self.draw((0, old_y, self.w, h))
 
