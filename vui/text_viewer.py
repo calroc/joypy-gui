@@ -1,20 +1,9 @@
 import string
 import pygame
+from core import ARROW_KEYS, BACKGROUND as BG, FOREGROUND as FG
 import viewer
 reload(viewer)
-import util
-reload(util)
 
-
-ARROW_KEYS = frozenset({
-    pygame.K_UP,
-    pygame.K_DOWN,
-    pygame.K_LEFT,
-    pygame.K_RIGHT
-    })
-
-FG = viewer.FOREGROUND
-BG = viewer.BACKGROUND
 
 MenuViewer = viewer.MenuViewer
 
@@ -169,9 +158,10 @@ class TextViewer(MenuViewer):
     def handle(self, message):
         if super(TextViewer, self).handle(message):
             return
-        if (isinstance(message, util.ModifyMessage)
+        if (isinstance(message, core.ModifyMessage)
             and message.subject is self.lines
             ):
+            # TODO: check self.at_line
             self.draw_body()
 
     def draw_menu(self):
@@ -260,7 +250,7 @@ class TextViewer(MenuViewer):
             print '%r %i %s' % (uch, key, bin(mod))
 
         if modified:
-            message = util.ModifyMessage(self, self.lines)
+            message = core.ModifyMessage(self, self.lines)
             display.broadcast(message)
 
     def _printable_key(self, uch, mod, line, i):
@@ -328,13 +318,3 @@ class TextViewer(MenuViewer):
         else:
             self.draw_body()
             self.cursor.draw()
-
-
-if __name__ == '__main__':
-    t = d.open_viewer(2, 160, TextViewer)
-    t.lines[:] = '''\
-Hey there!  Okay, wow.  That's fuckin cool.
-It really works. \0\0 It's hairy and covered in shit,
-but it's mine and I love it.'''.splitlines()
-    d.grow_viewer(d.grow_viewer(t))
-    d.loop(clock)

@@ -1,11 +1,26 @@
 import pygame
 
 
-BLACK = 0, 0, 0
+BLACK = FOREGROUND = 0, 0, 0
 GREY = 127, 127, 127
-WHITE = 255, 255, 255
+WHITE = BACKGROUND = 255, 255, 255
 BLUE = 100, 100, 255
 GREEN = 70, 200, 70
+
+
+MOUSE_EVENTS = frozenset({
+    pygame.MOUSEMOTION,
+    pygame.MOUSEBUTTONDOWN,
+    pygame.MOUSEBUTTONUP
+    })
+
+
+ARROW_KEYS = frozenset({
+    pygame.K_UP,
+    pygame.K_DOWN,
+    pygame.K_LEFT,
+    pygame.K_RIGHT
+    })
 
 
 # Eight "trays" or "modes" made by the three main mode keys.
@@ -39,5 +54,5 @@ class ModifyMessage(Message):
         self.details = details
 
 
-if __name__ == '__main__':
-    pass
+##if __name__ == '__main__':
+##    pass

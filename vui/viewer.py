@@ -50,16 +50,7 @@ Done:
 '''
 from copy import copy
 import pygame
-from util import BLACK, BLUE, GREY, WHITE
-
-FOREGROUND = BLACK
-BACKGROUND = WHITE
-
-MOUSE_EVENTS = frozenset({
-    pygame.MOUSEMOTION,
-    pygame.MOUSEBUTTONDOWN,
-    pygame.MOUSEBUTTONUP
-    })
+from core import BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS
 
 
 class Display(object):
@@ -651,78 +642,8 @@ class SomeViewer(MenuViewer):
 # in the code is broken by "intent" for now..
 
 
-def draw_a(surface, color=WHITE, blend=False):
+def draw_a(surface, color=FOREGROUND, blend=False):
     w, h = surface.get_width() - 2, surface.get_height() - 2
     pygame.draw.aalines(surface, color, False, (
         (1, h), (w / 2, 1), (w, h), (1, h / 2)
         ), blend)
-
-
-if __name__ == '__main__':
-    import traceback
-    # See e.g. ministart.py for details of setting up the context for this
-    # code to work.
-    screen.fill((0,0,0))
-    pygame.display.update()
-    pygame.event.set_allowed(None)
-    pygame.event.set_allowed([
-        pygame.QUIT,
-        pygame.KEYUP,
-        pygame.KEYDOWN,
-        pygame.MOUSEMOTION,
-        pygame.MOUSEBUTTONDOWN,
-        pygame.MOUSEBUTTONUP,
-        ])
-
-    d = Display(screen, 89, 144)
-    pygame.display.update()
-
-    print 'Opening left viewer...'
-    left = d.open_viewer(0, 0, SomeViewer)
-    print 'Opening right viewers...'
-    right0 = d.open_viewer(539, 0, MenuViewer)
-    right0.bg = 106, 150, 104
-##    right1 = d.open_viewer(239, 80, MenuViewer)
-##    right1.bg = 142, 139, 126
-##    right2 = d.open_viewer(239, 160, MenuViewer)
-##    right2.bg = 149, 122, 126
-    d.redraw()
-
-##    # v0 | v1
-##    # v3 | -
-##    # v4 | v2
-##
-##    v4 = d.open_viewer(20, 120, Viewer)
-##    v3 = d.open_viewer(10, 60, Viewer)
-##    v0 = d.open_viewer(0, 0, Viewer)
-##    v1 = d.open_viewer(180, 0, Viewer)
-##    v2 = d.open_viewer(200, 100, Viewer)
-
-    pygame.display.update()
-
-    clock = pygame.time.Clock()
-
-    error_count = 0
-    while error_count < 10:
-        try:
-            d.loop(clock)
-            error_count = 10
-        except:
-            traceback.print_exc()
-            error_count += 1
-
-
-    # d.close_viewer(v4) ; pygame.display.update()
-
-    ##print v0.w, v0.h
-    ##print v1.w, v1.h
-    ##print v2.w, v2.h
-
-    ##for x, T in d.tracks:
-    ##    for y, V in T.viewers:
-    ##        print x, y, V.w, V.h
-    ##        # V.draw()  # to re-draw all viewers!
-
-
-    ##d.open_viewer(10, 100, Viewer) ; pygame.display.update()
-
