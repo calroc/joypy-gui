@@ -31,7 +31,7 @@ setup(
   author='Simon Forman',
   author_email='forman.simon@gmail.com',
   url='https://github.com/calroc/joypy_gui',
-  packages=['gui'],
+  packages=['gui', 'vui'],
   entry_points={'console_scripts': ['gui_joy=gui.main:main']},
   classifiers=[
     'Development Status :: 3 - Alpha',
