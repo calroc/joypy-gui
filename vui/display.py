@@ -381,48 +381,54 @@ class Display(object):
         Display event handling.
         '''
         try:
-            # Keyboard events.
-            if event.type == pygame.KEYUP:
-                if self.focused_viewer:
-                    self.focused_viewer.key_up(self, event.key, event.mod)
-                return
-            if event.type == pygame.KEYDOWN:
-                if self.focused_viewer:
-                    self.focused_viewer.key_down(
-                        self, event.unicode, event.key, event.mod)
-                return
-
-            # Mouse events.
-            assert event.type in MOUSE_EVENTS  # Use pygame.event.set_allowed().
-
-            V, x, y = self.at(*event.pos)
-
-            if event.type == pygame.MOUSEMOTION:
-                if not isinstance(V, Track):
-                    V.mouse_motion(self, x, y, *(event.rel + event.buttons))
-
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                self.focus(V)
-                V.mouse_down(self, x, y, event.button)
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-
-                # Check for moving viewer.
-                if (event.button == 2
-                    and self.focused_viewer
-                    and V is not self.focused_viewer
-                    and V.MINIMUM_HEIGHT < y < V.h - self.focused_viewer.MINIMUM_HEIGHT
-                    ):
-                    self._move_viewer(V, y, self.focused_viewer, *event.pos)
-
-                else:
-                    V.mouse_up(self, x, y, event.button)
-
+            if event.type in {pygame.KEYUP, pygame.KEYDOWN}:
+                self._keyboard_event(event)
+            elif event.type in MOUSE_EVENTS:
+                self._mouse_event(event)
+            else:
+                print >> stderr, (
+                    'received event %s Use pygame.event.set_allowed().'
+                    % pygame.event.event_name(event.type)
+                    )
         # Catch all exceptions and open a viewer.
         except:
             err = format_exc()
             print >> stderr, err # To be safe just print it right away.
             open_viewer_on_string(self, err, self.broadcast)
+
+    def _keyboard_event(self, event):
+        if not self.focused_viewer:
+            return
+        if event.type == pygame.KEYUP:
+            self.focused_viewer.key_up(self, event.key, event.mod)
+        elif event.type == pygame.KEYDOWN:
+            self.focused_viewer.key_down(
+                self, event.unicode, event.key, event.mod)
+
+    def _mouse_event(self, event):
+        V, x, y = self.at(*event.pos)
+
+        if event.type == pygame.MOUSEMOTION:
+            if not isinstance(V, Track):
+                V.mouse_motion(self, x, y, *(event.rel + event.buttons))
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self.focus(V)
+            V.mouse_down(self, x, y, event.button)
+
+        else:
+            assert event.type == pygame.MOUSEBUTTONUP
+
+            # Check for moving viewer.
+            if (event.button == 2
+                and self.focused_viewer
+                and V is not self.focused_viewer
+                and V.MINIMUM_HEIGHT < y < V.h - self.focused_viewer.MINIMUM_HEIGHT
+                ):
+                self._move_viewer(V, y, self.focused_viewer, *event.pos)
+
+            else:
+                V.mouse_up(self, x, y, event.button)
 
 
 class Track(Viewer):

@@ -60,6 +60,7 @@ def init_context(screen, clock, pt):
     d.register_commands(D)
     pt.register_commands(D)
     log = init_text(d, pt, 0, 0, 'log.txt')
+    tho = init_text(d, pt, 0, d.h / 3, 'menu.txt')
     t = init_text(d, pt, d.w / 2, 0, 'scratch.txt')
     loop = core.TheLoop(d, clock)
     stack_id, stack_holder = pt.open('stack.pickle')
