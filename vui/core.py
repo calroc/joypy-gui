@@ -38,6 +38,12 @@ ALLOWED_EVENTS = [pygame.QUIT, pygame.KEYUP, pygame.KEYDOWN]
 ALLOWED_EVENTS.extend(MOUSE_EVENTS)
 ALLOWED_EVENTS.extend(TASK_EVENTS)
 
+
+# Message status codes...  dunno if this is a good idea or not...
+ERROR = -1
+PENDING = 0
+SUCCESS = 1
+
         
 # messaging support
 
@@ -63,25 +69,46 @@ class ModifyMessage(Message):
         self.details = details
 
 
+class OpenMessage(Message):
+
+    def __init__(self, sender, name):
+        Message.__init__(self, sender)
+        self.name = name
+        self.content_id = self.lines = None
+        self.status = PENDING
+        self.traceback = None
+
+
 # Joy Interpreter & Context
 
 
 class World(object):
 
-    def __init__(self, stack_holder, dictionary, notify, content_id):
+    def __init__(self, stack_id, stack_holder, dictionary, notify, log):
         self.stack_holder = stack_holder
         self.dictionary = dictionary
         self.notify = notify
-        self._id = content_id
+        self.stack_id = stack_id
+        self.log = log.lines
+        self.log_id = log.content_id
 
     def handle(self, message):
         if not isinstance(message, CommandMessage):
             return
         c, s, d = message.command, self.stack_holder[0], self.dictionary
         self.stack_holder[0], _, self.dictionary = run(c, s, d)
-        cm = ModifyMessage(self, self.stack_holder, content_id=self._id)
-        self.notify(cm)
-        print stack_to_string(self.stack_holder[0])
+        mm = ModifyMessage(self, self.stack_holder, content_id=self.stack_id)
+        self.notify(mm)
+        self.log.extend(self.format_log_output(c))
+        mm = ModifyMessage(self, self.log, content_id=self.log_id)
+        self.notify(mm)
+
+    def format_log_output(self, command):
+        return ('''
+joy? %s
+
+%s <-
+''' % (command, stack_to_string(self.stack_holder[0]))).splitlines()
 
 
 # main loop
@@ -141,7 +168,3 @@ class TheLoop(object):
                     self.display.dispatch_event(event)
             pygame.display.update()
             self.clock.tick(self.FRAME_RATE)
-
-
-##if __name__ == '__main__':
-##    pass

@@ -44,6 +44,7 @@ Done:
 - Persistance of data
 - Content change notification
 - Vertical scrolling w/ keys
+- Vertical scrolling w/ mouse wheel
 - Enter/return key
 - Arrow keys wrap at line ends
 - Backspace/delete wrap at line ends

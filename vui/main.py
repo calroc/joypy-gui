@@ -33,12 +33,12 @@ D = initialize()
 ##for func in ():
 ##  D[func.__name__] = func
 
-##stack = load_stack()
 
 try:
     A = A
 except NameError:
     A = None
+
 
 def init():
     global A
@@ -66,19 +66,20 @@ def error_guard(loop, n=10):
             traceback.print_exc()
             error_count += 1
 
+
 d = None
 def main():
     global d
     screen, clock, pt = init()
     d = display.Display(screen, D.__contains__, 89, 144)
-    loop = core.TheLoop(d, clock)
-    content_id, stack_holder = pt.open('stack.pickle')
-    world = core.World(stack_holder, D, d.broadcast, content_id)
-    loop.install_task(pt.task_run, 2000)  # save files every two seconds
-    d.handlers.append(pt.handle)
-    d.handlers.append(world.handle)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
     t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
+    loop = core.TheLoop(d, clock)
+    stack_id, stack_holder = pt.open('stack.pickle')
+    world = core.World(stack_id, stack_holder, D, d.broadcast, log)
+    loop.install_task(pt.task_run, 10000)  # save files every ten seconds
+    d.handlers.append(pt.handle)
+    d.handlers.append(world.handle)
     error_guard(loop.loop)
 
 

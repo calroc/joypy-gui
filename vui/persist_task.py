@@ -1,4 +1,4 @@
-import os, pickle
+import os, pickle, traceback
 from collections import Counter
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
@@ -39,7 +39,6 @@ class Resource(object):
             print >> f, line
 
     def persist(self, repo):
-        print 'persisting', self.filename
         with open(self.filename, 'w') as f:
             os.chmod(self.filename, 0600)
             self._to_file(f)
@@ -82,8 +81,21 @@ class PersistTask(object):
         return content_id, resource.thing
 
     def handle(self, message):
-        if not isinstance(message, core.ModifyMessage):
-            return
+        if isinstance(message, core.OpenMessage):
+            self.handle_open(message)
+        elif isinstance(message, core.ModifyMessage):
+            self.handle_modify(message)
+
+    def handle_open(self, message):
+        try:
+            message.content_id, message.thing = self.open(message.name)
+        except:
+            message.traceback = traceback.format_exc()
+            message.status = core.ERROR
+        else:
+            message.status = core.SUCCESS
+
+    def handle_modify(self, message):
         try:
             content_id = message.details['content_id']
         except KeyError:
@@ -107,8 +119,8 @@ class PersistTask(object):
         self.commit()
 
     def commit(self, message='auto-commit'):
-        print 'commit', message
         return self.repo.do_commit(message, committer=core.COMMITTER)
+
 
 if __name__ == '__main__':
     JOY_HOME = os.path.expanduser('~/.joypy')
