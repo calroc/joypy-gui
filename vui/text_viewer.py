@@ -339,9 +339,6 @@ class TextViewer(MenuViewer):
         if key in SELECTION_KEYS:
             self._selection_key(display, key, mod)
             return
-        # The selection is fragile.
-        self._deselect()
-        self._sel_start = self._sel_end = None
 
         if key in ARROW_KEYS:
             self._arrow_key(key, mod)
@@ -363,6 +360,9 @@ class TextViewer(MenuViewer):
             print '%r %i %s' % (uch, key, bin(mod))
 
         if modified:
+            # The selection is fragile.
+            self._deselect()
+            self._sel_start = self._sel_end = None
             message = ModifyMessage(
                 self, self.lines, content_id=self.content_id)
             display.broadcast(message)
@@ -378,23 +378,51 @@ class TextViewer(MenuViewer):
             self._update_selection()
         elif key == pygame.K_F3:
             self._copy_selection(display)
+        elif key == pygame.K_F4:
+            if mod & pygame.KMOD_SHIFT:
+                self._delete_selection(display)
+            else:
+                self._cut_selection(display)
         elif key == pygame.K_F5:
             self._sel_start = self._sel_end = None
         self.cursor.draw()
 
     def _deselect(self):
-        if (not (self._sel_start and self._sel_end)
-            or self._sel_start == self._sel_end
-            ):
-            return
-        srow, erow = self._sel_start[0], self._sel_end[0]
-        # Just erase the whole selection.
-        for r in range(min(srow, erow), max(srow, erow) + 1):
-            self._redraw_line(r)
+        if self._has_selection():
+            srow, erow = self._sel_start[0], self._sel_end[0]
+            # Just erase the whole selection.
+            for r in range(min(srow, erow), max(srow, erow) + 1):
+                self._redraw_line(r)
 
     def _copy_selection(self, display):
         selection = self._get_selection()
         display.broadcast(CommandMessage(self, repr(selection)))
+
+    def _cut_selection(self, display):
+        if self._has_selection():
+            self._copy_selection(display)
+            self._delete_selection(display)
+
+    def _delete_selection(self, display):
+        if not self._has_selection():
+            return
+        self.cursor.fade()
+        print 1
+        srow, scolumn, erow, ecolumn = self._selection_coords()
+        if srow == erow:
+            print 2
+            line = self.lines[srow]
+            self.lines[srow] = line[:scolumn] + line[ecolumn:]
+        else:
+            print 3
+            left = self.lines[srow][:scolumn]
+            right = self.lines[erow][ecolumn:]
+            self.lines[srow:erow + 1] = [left + right]
+        print 4
+        self.draw_body()
+        self.cursor.set_to(srow, scolumn)
+        display.broadcast(ModifyMessage(
+            self, self.lines, content_id=self.content_id))
 
     def _has_selection(self):
         return (self._sel_start

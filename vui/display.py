@@ -32,6 +32,7 @@ Still to do:
 * capture and display tracebacks
 * Selecting text
   * Cut/Copy/Paste
+  * System query for most recent selection
 * Home/End keys
 * Vertical scrolling w/ scrollbar
 * Shift-scroll changes viewer height?
