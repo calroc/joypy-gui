@@ -78,7 +78,6 @@ from traceback import format_exc
 import pygame
 from joy.library import DefinitionWrapper, SimpleFunctionWrapper
 from core import (
-    CommandMessage,
     OpenMessage,
     PersistMessage,
     SUCCESS,

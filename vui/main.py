@@ -10,6 +10,7 @@ for name in 'core display viewer text_viewer stack_viewer persist_task'.split():
 
 import pygame
 from joy.library import initialize, SimpleFunctionWrapper
+from joy.utils.stack import list_to_stack
 import core, display, text_viewer, persist_task
 
 
@@ -36,6 +37,12 @@ try:
 except NameError:
     D = initialize()
 
+    @SimpleFunctionWrapper
+    def splitlines(stack):
+        text, stack = stack
+        assert isinstance(text, str), repr(text)
+        return list_to_stack(text.splitlines()), stack
+    D['splitlines'] = splitlines
 
 try:
     A = A
@@ -75,7 +82,7 @@ def error_guard(loop, n=10):
 
 
 def init_context(screen, clock, pt):
-    tracks = (1, 1, 1, 1, 1) if FULLSCREEN else (89, 144)
+    tracks = (144 - 89, 144, 89) if FULLSCREEN else (89, 144)
     d = display.Display(screen, D.__contains__, *tracks)
     d.register_commands(D)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
