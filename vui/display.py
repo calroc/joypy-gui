@@ -27,7 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* "shutdown" signal to tell PT to commit outstanding changes.
 * A way to open a default viewer (in case you close them all.)
 * Return key can orphan a line at the bottom of a viewer.
 * Redirect stdout to "print" to the log.
@@ -44,6 +43,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- "shutdown" signal to tell PT to commit outstanding changes.
 - Local library auto-loaded at start-time
   - library.py, primitives in Python
   - definitions.txt

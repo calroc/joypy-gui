@@ -86,6 +86,9 @@ class PersistMessage(Message):
         self.details = details
 
 
+class ShutdownMessage(Message): pass
+
+
 # Joy Interpreter & Context
 
 
@@ -195,3 +198,4 @@ class TheLoop(object):
                     self.display.dispatch_event(event)
             pygame.display.update()
             self.clock.tick(self.FRAME_RATE)
+        self.display.broadcast(ShutdownMessage(self))

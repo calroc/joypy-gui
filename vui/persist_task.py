@@ -88,6 +88,10 @@ class PersistTask(object):
             self.handle_modify(message)
         elif isinstance(message, core.PersistMessage):
             self.handle_persist(message)
+        elif isinstance(message, core.ShutdownMessage):
+            for content_id in self.counter:
+                self.store[content_id].persist(content_id)
+            self.commit('shutdown')
 
     def handle_open(self, message):
         try:
