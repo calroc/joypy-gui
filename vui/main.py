@@ -2,8 +2,8 @@
 import os, pickle, sys
 
 import pygame
-import visual_user_interface
-reload(visual_user_interface)
+import viewer
+reload(viewer)
 import text_viewer
 reload(text_viewer)
 
@@ -116,7 +116,7 @@ def loop(d, clock):
  
 def main():
     screen, clock = init()
-    d = visual_user_interface.Display(screen, 89, 144)
+    d = viewer.Display(screen, 89, 144)
     log = d.open_viewer(0, 0, text_viewer.TextViewer)
     init_text(log, 'Log', LOG_FN)
     t = d.open_viewer(0, d.w / 2, text_viewer.TextViewer)

@@ -1,7 +1,7 @@
 import string
 import pygame
-import visual_user_interface
-reload(visual_user_interface)
+import viewer
+reload(viewer)
 import util
 reload(util)
 
@@ -13,10 +13,10 @@ ARROW_KEYS = frozenset({
     pygame.K_RIGHT
     })
 
-FG = visual_user_interface.FOREGROUND
-BG = visual_user_interface.BACKGROUND
+FG = viewer.FOREGROUND
+BG = viewer.BACKGROUND
 
-MenuViewer = visual_user_interface.MenuViewer
+MenuViewer = viewer.MenuViewer
 
 
 class Font(object):
