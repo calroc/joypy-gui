@@ -27,18 +27,21 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* "print" to e.g. log
+* open a resource list
 * Menu text, commands and name or title
+* capture and display tracebacks
 * Selecting text
   * Cut/Copy/Paste
 * Home/End keys
 * Vertical scrolling w/ scrollbar
+* Shift-scroll changes viewer height?
 * Horizontal scrolling w/ keys
 * Horizontal scrolling w/ scrollbar?
 * Pgup/down keys?
 * Tab key?
 
 Done:
+- "print" to e.g. log
 - Command evaluation
 - Joy integration
 - Persistance of data

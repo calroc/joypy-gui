@@ -156,7 +156,7 @@ class TextViewer(MenuViewer):
         self.body_surface = surface.subsurface(self.body_rect)
         self.line_w = self.body_rect.w / FONT.char_w + 1
         self.h_in_lines = self.body_rect.h / FONT.line_h - 1
-        self.command_rect = None
+        self.command_rect = self.command = None
 
     def handle(self, message):
         if super(TextViewer, self).handle(message):
@@ -172,11 +172,10 @@ class TextViewer(MenuViewer):
 
     def draw_body(self):
         MenuViewer.draw_body(self)
-        y, h = 0, self.body_rect.height
-        for line in self.lines[self.at_line:]:
-            if y > h: break
+        ys = xrange(0, self.body_rect.height, FONT.line_h)
+        ls = self.lines[self.at_line:self.at_line + self.h_in_lines + 2]
+        for y, line in zip(ys, ls):
             self.draw_line(y, line)
-            y += FONT.line_h
 
     def draw_line(self, y, line):
         surface = FONT.render(line[:self.line_w])
@@ -188,8 +187,7 @@ class TextViewer(MenuViewer):
         else:
             n = self.line_w - len(line)
             if n > 0: line = line + ' ' * n
-        y = self.cursor.screen_y(row)
-        self.draw_line(y, line)
+        self.draw_line(self.cursor.screen_y(row), line)
 
     def focus(self):
         self.cursor.v = self
@@ -233,7 +231,7 @@ class TextViewer(MenuViewer):
             len(word) * FONT.char_w, # w
             FONT.line_h # h
             )
-        pygame.draw.aaline(self.body_surface, FG, r.bottomleft, r.bottomright)
+        pygame.draw.line(self.body_surface, FG, r.bottomleft, r.bottomright)
         self.command = word
 
     def command_up(self, display):
