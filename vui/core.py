@@ -26,7 +26,7 @@ ARROW_KEYS = frozenset({
 
 
 TASK_EVENTS = tuple(range(pygame.USEREVENT, pygame.NUMEVENTS))
-AVAILABLE_TASK_EVENTS = set()
+AVAILABLE_TASK_EVENTS = set(TASK_EVENTS)
 
 
 ALLOWED_EVENTS = [pygame.QUIT, pygame.KEYUP, pygame.KEYDOWN]
@@ -45,7 +45,7 @@ class Message(object):
 
 class ModifyMessage(Message):
 
-    def __init__(self, sender, subject, *details):
+    def __init__(self, sender, subject, **details):
         Message.__init__(self, sender)
         self.subject = subject
         self.details = details
@@ -78,6 +78,10 @@ class TheLoop(object):
         pygame.time.set_timer(task_event_id, 0)
         del self.tasks[task_event_id]
         AVAILABLE_TASK_EVENTS.add(task_event_id)
+
+    def __del__(self):
+        for task_event_id in self.tasks:
+            pygame.time.set_timer(task_event_id, 0)
 
     def run_task(self, task_event_id):
         task = self.tasks[task_event_id]

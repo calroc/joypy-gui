@@ -1,6 +1,11 @@
 import string
 import pygame
-from core import ARROW_KEYS, BACKGROUND as BG, FOREGROUND as FG
+from core import (
+    ARROW_KEYS,
+    BACKGROUND as BG,
+    FOREGROUND as FG,
+    ModifyMessage,
+    )
 import viewer
 reload(viewer)
 
@@ -133,6 +138,7 @@ class TextViewer(MenuViewer):
         self.cursor = self.Cursor(self)
         MenuViewer.__init__(self, surface)
         self.lines = ['']
+        self.content_id = None
         self.at_line = 0
         self.bg = BG
 
@@ -158,7 +164,7 @@ class TextViewer(MenuViewer):
     def handle(self, message):
         if super(TextViewer, self).handle(message):
             return
-        if (isinstance(message, core.ModifyMessage)
+        if (isinstance(message, ModifyMessage)
             and message.subject is self.lines
             ):
             # TODO: check self.at_line
@@ -250,7 +256,8 @@ class TextViewer(MenuViewer):
             print '%r %i %s' % (uch, key, bin(mod))
 
         if modified:
-            message = core.ModifyMessage(self, self.lines)
+            message = ModifyMessage(
+                self, self.lines, content_id=self.content_id)
             display.broadcast(message)
 
     def _printable_key(self, uch, mod, line, i):

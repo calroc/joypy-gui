@@ -31,12 +31,12 @@ Still to do:
 * Joy integration
 * Command evaluation
   * Menu text, commands and name or title
-* Vertical scrolling w/ scrollbar
-* Horizontal scrolling w/ keys
-* Horizontal scrolling w/ scrollbar
 * Selecting text
   * Cut/Copy/Paste
 * Home/End keys
+* Vertical scrolling w/ scrollbar
+* Horizontal scrolling w/ keys
+* Horizontal scrolling w/ scrollbar
 * Pgup/down keys?
 * Tab key?
 
@@ -74,6 +74,7 @@ class Display(object):
         self.w, self.h = screen.get_width(), screen.get_height()
         self.focused_viewer = None
         self.tracks = []  # (x, track)
+        self.handlers = []
         # Create the tracks.
         if not track_ratios: track_ratios = 1, 4
         x, total = 0, sum(track_ratios)
@@ -223,6 +224,8 @@ class Display(object):
     def broadcast(self, message):
         for _, track in self.tracks:
             track.broadcast(message)
+        for handler in self.handlers:
+            handler(message)
 
     def redraw(self):
         for _, track in self.tracks:

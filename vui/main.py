@@ -7,7 +7,7 @@ reload(viewer)
 import text_viewer
 reload(text_viewer)
 from core import TheLoop, ALLOWED_EVENTS
-
+from persist_task import PersistTask
 
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
@@ -68,11 +68,9 @@ def save_stack():
     #print >> sys.stderr, commit_id
 
 
-def init_text(viewer, title, filename):
-    if os.path.exists(filename):
-        with open(filename) as f:
-            viewer.lines[:] = f.read().splitlines()
-        viewer.draw()
+def init_text(pt, viewer, title, filename):
+    viewer.content_id, viewer.lines = pt.open(filename)
+    viewer.draw()
 #    repo_relative_filename = repo_relative_path(filename)
 
 
@@ -80,10 +78,13 @@ def init_text(viewer, title, filename):
 ##for func in ():
 ##  D[func.__name__] = func
 
-
 ##stack = load_stack()
 
-A = None
+try:
+    A = A
+except NameError:
+    A = None
+
 def init():
     global A
     if A:
@@ -95,7 +96,8 @@ def init():
     clock = pygame.time.Clock()
     pygame.event.set_allowed(None)
     pygame.event.set_allowed(ALLOWED_EVENTS)
-    A = screen, clock
+    pt = PersistTask(JOY_HOME)
+    A = screen, clock, pt
     return A
 
 
@@ -109,15 +111,18 @@ def error_guard(loop, n=10):
             traceback.print_exc()
             error_count += 1
 
- 
+d = None
 def main():
-    screen, clock = init()
+    global d
+    screen, clock, pt = init()
     d = viewer.Display(screen, 89, 144)
     loop = TheLoop(d, clock)
+    loop.install_task(pt.task_run, 2000)  # save files every two seconds
+    d.handlers.append(pt.handle)
     log = d.open_viewer(0, 0, text_viewer.TextViewer)
-    init_text(log, 'Log', LOG_FN)
+    init_text(pt, log, 'Log', 'log.txt')
     t = d.open_viewer(d.w / 2, 0, text_viewer.TextViewer)
-    init_text(t, 'Joy - ' + JOY_HOME, JOY_FN)
+    init_text(pt, t, 'Joy - ' + JOY_HOME, 'scratch.txt')
     error_guard(loop.loop)
 
 
