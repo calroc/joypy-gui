@@ -393,7 +393,10 @@ class TextViewer(MenuViewer):
             self._sel_end = self.cursor.y, self.cursor.x
             self._update_selection()
         elif key == pygame.K_F3: # copy
-            self._copy_selection(display)
+            if mod & pygame.KMOD_SHIFT:
+                self._parse_selection(display)
+            else:
+                self._copy_selection(display)
             self._update_selection()
         elif key == pygame.K_F4: # cut or delete
             if mod & pygame.KMOD_SHIFT:
@@ -420,6 +423,11 @@ class TextViewer(MenuViewer):
             display.broadcast(ModifyMessage(
                 self, om.thing, content_id=om.content_id))
             return True
+
+    def _parse_selection(self, display):
+        if self._has_selection():
+            if self._copy_selection(display):
+                display.broadcast(CommandMessage(self, 'parse'))
 
     def _cut_selection(self, display):
         if self._has_selection():
