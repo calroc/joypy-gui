@@ -337,7 +337,7 @@ class TextViewer(MenuViewer):
     def key_down(self, display, uch, key, mod):
 
         if key in SELECTION_KEYS:
-            self._selection_key(key, mod)
+            self._selection_key(display, key, mod)
             return
         # The selection is fragile.
         self._deselect()
@@ -367,7 +367,7 @@ class TextViewer(MenuViewer):
                 self, self.lines, content_id=self.content_id)
             display.broadcast(message)
 
-    def _selection_key(self, key, mod):
+    def _selection_key(self, display, key, mod):
         self.cursor.fade()
         self._deselect()
         if key == pygame.K_F1:
@@ -376,6 +376,8 @@ class TextViewer(MenuViewer):
         elif key == pygame.K_F2:
             self._sel_end = self.cursor.y, self.cursor.x
             self._update_selection()
+        elif key == pygame.K_F3:
+            self._copy_selection(display)
         elif key == pygame.K_F5:
             self._sel_start = self._sel_end = None
         self.cursor.draw()
@@ -390,28 +392,55 @@ class TextViewer(MenuViewer):
         for r in range(min(srow, erow), max(srow, erow) + 1):
             self._redraw_line(r)
 
+    def _copy_selection(self, display):
+        selection = self._get_selection()
+        display.broadcast(CommandMessage(self, repr(selection)))
+
+    def _has_selection(self):
+        return (self._sel_start
+                and self._sel_end
+                and self._sel_start != self._sel_end)
+
+    def _get_selection(self):
+        '''Return the current selection if any as a single string.'''
+        if not self._has_selection():
+            return ''
+        srow, scolumn, erow, ecolumn = self._selection_coords()
+        if srow == erow:
+            return self.lines[srow][scolumn:ecolumn]
+        lines = []
+        assert srow < erow
+        while srow <= erow:
+            line = self.lines[srow]
+            e = ecolumn if srow == erow else len(line)
+            lines.append(line[scolumn:e])
+            scolumn = 0
+            srow += 1
+        return '\n'.join(lines)
+
+    def _selection_coords(self):
+        (srow, scolumn), (erow, ecolumn) = (
+            min(self._sel_start, self._sel_end),
+            max(self._sel_start, self._sel_end)
+            )
+        return srow, scolumn, erow, ecolumn
+
     def _update_selection(self):
         if self._sel_start is None and self._sel_end:
             self._sel_start = self._sel_end
         elif self._sel_end is None and self._sel_start:
             self._sel_end = self._sel_start
         assert self._sel_start and self._sel_end
-        if self._sel_start == self._sel_end:
-            print 'no selection'
-            return
-        start, end = (
-            min(self._sel_start, self._sel_end),
-            max(self._sel_start, self._sel_end)
-            )
-        self._highlight(start, end)
+        if self._sel_start != self._sel_end:
+            for rect in self._iter_selection_rectangles():
+                self.body_surface.fill(
+                    SELECTION_COLOR,
+                    rect,
+                    pygame.BLEND_RGBA_MULT
+                    )
 
-    def _highlight(self, (start_row, start_column), (end_row, end_column)):
-        for rect in self._iter_selection_rectangles(
-            start_row, start_column, end_row, end_column
-            ):
-            self.body_surface.fill(SELECTION_COLOR, rect, pygame.BLEND_RGBA_MULT)
-
-    def _iter_selection_rectangles(self, srow, scolumn, erow, ecolumn):
+    def _iter_selection_rectangles(self, ):
+        srow, scolumn, erow, ecolumn = self._selection_coords()
         if srow == erow:
             yield (
                 scolumn * FONT.char_w,
