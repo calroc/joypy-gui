@@ -228,19 +228,6 @@ class Display(object):
         for _, track in self.tracks:
             track.redraw()
 
-    def loop(self, clock, frame_rate=10):
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
-                    running = False
-                else:
-                    self.dispatch_event(event)
-            pygame.display.update()
-            clock.tick(frame_rate)
-
     def focus(self, viewer):
         if isinstance(viewer, Track):
             if self.focused_viewer: self.focused_viewer.unfocus()

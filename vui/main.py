@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-import os, pickle, sys
+import os, pickle, sys, traceback
 
 import pygame
 import viewer
 reload(viewer)
 import text_viewer
 reload(text_viewer)
+from core import TheLoop, ALLOWED_EVENTS
+
 
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
@@ -92,24 +94,17 @@ def init():
     screen = pygame.display.set_mode((1024, 768))
     clock = pygame.time.Clock()
     pygame.event.set_allowed(None)
-    pygame.event.set_allowed([
-        pygame.QUIT,
-        pygame.KEYUP,
-        pygame.KEYDOWN,
-        pygame.MOUSEMOTION,
-        pygame.MOUSEBUTTONDOWN,
-        pygame.MOUSEBUTTONUP,
-        ])
+    pygame.event.set_allowed(ALLOWED_EVENTS)
     A = screen, clock
     return A
 
 
-def loop(d, clock):
+def error_guard(loop, n=10):
     error_count = 0
-    while error_count < 10:
+    while error_count < n:
         try:
-            d.loop(clock)
-            error_count = 10
+            loop()
+            break
         except:
             traceback.print_exc()
             error_count += 1
@@ -118,11 +113,12 @@ def loop(d, clock):
 def main():
     screen, clock = init()
     d = viewer.Display(screen, 89, 144)
+    loop = TheLoop(d, clock)
     log = d.open_viewer(0, 0, text_viewer.TextViewer)
     init_text(log, 'Log', LOG_FN)
     t = d.open_viewer(d.w / 2, 0, text_viewer.TextViewer)
     init_text(t, 'Joy - ' + JOY_HOME, JOY_FN)
-    loop(d, clock)
+    error_guard(loop.loop)
 
 
 if __name__ == '__main__':
