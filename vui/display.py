@@ -29,7 +29,7 @@ tracks each of which manages zero or more viewers.
 Still to do:
 * Local library auto-loaded at start-time
   * primitives in Python
-  * definitions
+  - definitions.txt
 * A way to open a default viewer (in case you close them all.)
 * Return key can orphan a line at the bottom of a viewer.
 * Redirect stdout to "print" to the log.
@@ -278,6 +278,9 @@ class Display(object):
 
     def register_commands(self, D):
 
+        def install(command): D[command.name] = command
+
+        @install
         @SimpleFunctionWrapper
         def good_viewer_location(stack):
             viewers = list(self.iter_viewers())
@@ -289,6 +292,7 @@ class Display(object):
                 coords = (0, (0, ()))
             return coords, stack
 
+        @install
         @SimpleFunctionWrapper
         def open_viewer(stack):
             ((x, (y, _)), (content, stack)) = stack
@@ -297,6 +301,7 @@ class Display(object):
             V.draw()
             return stack
 
+        @install
         @SimpleFunctionWrapper
         def open_stack(stack):
             (x, (y, _)), stack = stack
@@ -304,6 +309,7 @@ class Display(object):
             V.draw()
             return stack
 
+        @install
         @SimpleFunctionWrapper
         def open_resource(stack):
             ((x, (y, _)), (name, stack)) = stack
@@ -315,6 +321,7 @@ class Display(object):
                 V.draw()
             return stack
 
+        @install
         @SimpleFunctionWrapper
         def name_viewer(stack):
             name, stack = stack
@@ -326,6 +333,7 @@ class Display(object):
                 self.focused_viewer.draw_menu()
             return stack
 
+        @install
         @SimpleFunctionWrapper
         def persist_viewer(stack):
             if self.focused_viewer:
@@ -334,18 +342,12 @@ class Display(object):
                 self.focused_viewer.draw_menu()
             return stack
 
+        @install
         @SimpleFunctionWrapper
         def inscribe(stack):
             definition, stack = stack
             DefinitionWrapper.add_def(definition, D)
             return stack
-
-        D['good_viewer_location'] = good_viewer_location
-        D['open_viewer'] = open_viewer
-        D['open_stack'] = open_stack
-        D['open_resource'] = open_resource
-        D['name_viewer'] = name_viewer
-        D['inscribe'] = inscribe
 
     def done_resizing(self):
         for _, track in self.tracks: # This should be done by a Message?
