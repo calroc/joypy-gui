@@ -1,6 +1,8 @@
 from sys import stderr
 from traceback import format_exc
 import pygame
+from joy.joy import run
+from joy.utils.stack import stack_to_string
 
 
 COMMITTER = 'Simon Forman <forman.simon@gmail.com>'
@@ -46,12 +48,40 @@ class Message(object):
         self.sender = sender
 
 
+class CommandMessage(Message):
+
+    def __init__(self, sender, command):
+        Message.__init__(self, sender)
+        self.command = command
+
+
 class ModifyMessage(Message):
 
     def __init__(self, sender, subject, **details):
         Message.__init__(self, sender)
         self.subject = subject
         self.details = details
+
+
+# Joy Interpreter & Context
+
+
+class World(object):
+
+    def __init__(self, stack_holder, dictionary, notify, content_id):
+        self.stack_holder = stack_holder
+        self.dictionary = dictionary
+        self.notify = notify
+        self._id = content_id
+
+    def handle(self, message):
+        if not isinstance(message, CommandMessage):
+            return
+        c, s, d = message.command, self.stack_holder[0], self.dictionary
+        self.stack_holder[0], _, self.dictionary = run(c, s, d)
+        cm = ModifyMessage(self, self.stack_holder, content_id=self._id)
+        self.notify(cm)
+        print stack_to_string(self.stack_holder[0])
 
 
 # main loop

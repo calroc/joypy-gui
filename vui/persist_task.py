@@ -1,4 +1,4 @@
-import os
+import os, pickle
 from collections import Counter
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
@@ -29,17 +29,33 @@ class Resource(object):
     def __init__(self, filename, repo_relative_filename):
         self.filename = filename
         self.repo_relative_filename = repo_relative_filename
-        self.lines = open(filename).read().splitlines()
+        self.thing = self._from_file(open(filename))
+
+    def _from_file(self, f):
+        return f.read().splitlines()
+
+    def _to_file(self, f):
+        for line in self.thing:
+            print >> f, line
 
     def persist(self, repo):
         print 'persisting', self.filename
         with open(self.filename, 'w') as f:
             os.chmod(self.filename, 0600)
-            for line in self.lines:
-                print >> f, line
+            self._to_file(f)
             f.flush()
             os.fsync(f.fileno())
+            # For goodness's sake, write it to the disk already!
         repo.stage([self.repo_relative_filename])
+
+
+class PickledResource(Resource):
+
+    def _from_file(self, f):
+        return [pickle.load(f)]
+
+    def _to_file(self, f):
+        pickle.dump(self.thing[0], f)
 
 
 class PersistTask(object):
@@ -61,8 +77,9 @@ class PersistTask(object):
         try:
             resource = self.store[content_id]
         except KeyError:
-            resource = self.store[content_id] = Resource(fn, self._r(fn))
-        return content_id, resource.lines
+            R = PickledResource if name.endswith('.pickle') else Resource
+            resource = self.store[content_id] = R(fn, self._r(fn))
+        return content_id, resource.thing
 
     def handle(self, message):
         if not isinstance(message, core.ModifyMessage):
@@ -96,11 +113,8 @@ class PersistTask(object):
 if __name__ == '__main__':
     JOY_HOME = os.path.expanduser('~/.joypy')
     pt = PersistTask(JOY_HOME)
-    content_id, lines = pt.open('scratch.txt')
-
+    content_id, thing = pt.open('stack.pickle')
     pt.persist(content_id)
-
-
     print pt.counter
     mm = core.ModifyMessage(None, None, content_id=content_id)
     pt.handle(mm)

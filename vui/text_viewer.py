@@ -4,6 +4,7 @@ from core import (
     ARROW_KEYS,
     BACKGROUND as BG,
     FOREGROUND as FG,
+    CommandMessage,
     ModifyMessage,
     )
 import viewer
@@ -242,7 +243,9 @@ class TextViewer(MenuViewer):
         line, i = self.lines[self.cursor.y], self.cursor.x
 
         modified = ()
-        if key == pygame.K_RETURN:
+        if key == pygame.K_r:
+            display.broadcast(CommandMessage(self, '23'))
+        elif key == pygame.K_RETURN:
             self._return_key(mod, line, i)
             modified = True
         elif key == pygame.K_BACKSPACE:

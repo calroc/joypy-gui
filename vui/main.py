@@ -6,10 +6,9 @@ import display
 reload(display)
 import text_viewer
 reload(text_viewer)
-from core import TheLoop, ALLOWED_EVENTS
+from core import TheLoop, World, ALLOWED_EVENTS
 from persist_task import PersistTask
 
-from joy.utils.stack import stack_to_string
 from joy.library import initialize
 
 
@@ -20,27 +19,6 @@ if JOY_HOME is None:
         raise ValueError('what directory?')
 
 
-def load_stack():
-    if os.path.exists(STACK_FN):
-        with open(STACK_FN) as f:
-          return pickle.load(f)
-    return ()
-
-
-def save_stack():
-    with open(STACK_FN, 'wb') as f:
-        os.chmod(STACK_FN, 0600)
-        pickle.dump(self.stack, f)
-        f.flush()
-        os.fsync(f.fileno())
-    repo.stage([self.relative_STACK_FN])
-    commit_id = repo.do_commit(
-        'message',
-        committer='Simon Forman <forman.simon@gmail.com>',
-        )
-    #print >> sys.stderr, commit_id
-
-
 def init_text(display, pt, x, y, title, filename):
     # TODO eventually title should go in the menu?
     viewer = display.open_viewer(x, y, text_viewer.TextViewer)
@@ -49,7 +27,7 @@ def init_text(display, pt, x, y, title, filename):
     return viewer
 
 
-##D = initialize()
+D = initialize()
 ##for func in ():
 ##  D[func.__name__] = func
 
@@ -92,8 +70,11 @@ def main():
     screen, clock, pt = init()
     d = display.Display(screen, 89, 144)
     loop = TheLoop(d, clock)
+    content_id, stack_holder = pt.open('stack.pickle')
+    world = World(stack_holder, D, d.broadcast, content_id)
     loop.install_task(pt.task_run, 2000)  # save files every two seconds
     d.handlers.append(pt.handle)
+    d.handlers.append(world.handle)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
     t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
     error_guard(loop.loop)
