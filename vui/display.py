@@ -24,53 +24,6 @@ Refer to Chapter 4 of the Project Oberon book for more information.
 
 There is a Display object that manages a pygame surface and N vertical
 tracks each of which manages zero or more viewers.
-
-
-Still to do:
-* Return key can orphan a line at the bottom of a viewer.
-* Redirect stdout to "print" to the log.
-* Calculator buttons on the numpad?
-* System query for most recent selection
-* Home/End keys
-* Vertical scrolling w/ scrollbar
-* Shift-scroll changes viewer height?
-* Horizontal scrolling w/ keys
-* Horizontal scrolling w/ scrollbar?
-* Pgup/down keys?
-* Tab key?
-* When moving viewers sometimes a command gets executed from the underlying
-    viewer.  This shouldn't happen.
-
-Done:
-- Pause/Break to open a trap viewer (in case you close them all.)
-- "shutdown" signal to tell PT to commit outstanding changes.
-- Local library auto-loaded at start-time
-  - library.py, primitives in Python
-  - definitions.txt
-- Can name and persist a viewer on an unstored string(list).
-- Inscribe function
-- Reverse video, well, grey background, menu bars
-- PT scans JOY_HOME for resource lists
-- Capture and display tracebacks
-- StackViewer
-- Update log when stack changes
-- Open a resource list
-- Open a viewer on a (unstored) string
-- Selecting text
--   Copy and Cut
--   Paste
-- Menu text, commands and name or title
-- "print" to e.g. log
-- Command evaluation
-- Joy integration
-- Persistance of data
-- Content change notification
-- Vertical scrolling w/ keys
-- Vertical scrolling w/ mouse wheel
-- Enter/return key
-- Arrow keys wrap at line ends
-- Backspace/delete wrap at line ends
-
 '''
 from copy import copy
 from sys import stderr
