@@ -14,6 +14,12 @@ reload(viewer)
 MenuViewer = viewer.MenuViewer
 
 
+def _is_command(display, word):
+    return display.lookup(word) or word.isdigit() or all(
+        not s or s.isdigit() for s in word.split('.', 1)
+        ) and len(word) > 1
+
+
 class Font(object):
 
     IMAGE = pygame.image.load('Iosevka12.BMP')
@@ -142,23 +148,7 @@ class TextViewer(MenuViewer):
         self.content_id = None
         self.at_line = 0
         self.bg = BG
-
-    def scroll_up(self):
-        if self.at_line < len(self.lines) - 1:
-            self.at_line += 1
-            self.body_surface.scroll(0, -FONT.line_h)
-            row = self.h_in_lines + self.at_line
-            self._redraw_line(row)
-            self._redraw_line(row + 1)
-            self.cursor.draw()
-
-    def scroll_down(self):
-        if self.at_line:
-            self.at_line -= 1
-            self.body_surface.scroll(0, FONT.line_h)
-            self._redraw_line(self.at_line)
-            self._redraw_line(self.at_line + 1)
-            self.cursor.draw()
+        self.command = None
 
     def resurface(self, surface):
         self.cursor.fade()
@@ -166,6 +156,7 @@ class TextViewer(MenuViewer):
         self.body_surface = surface.subsurface(self.body_rect)
         self.line_w = self.body_rect.w / FONT.char_w + 1
         self.h_in_lines = self.body_rect.h / FONT.line_h - 1
+        self.command_rect = None
 
     def handle(self, message):
         if super(TextViewer, self).handle(message):
@@ -207,29 +198,55 @@ class TextViewer(MenuViewer):
     def unfocus(self):
         self.cursor.fade()
 
-    def body_click(self, display, x, y, button):
-        if button == 1:
-            line, column, row = self.at(x, y)
-            self.cursor.set_to(column, row)
-        elif button == 2:
-            if pygame.KMOD_SHIFT & pygame.key.get_mods():
-                self.scroll_up()
-            else:
-                self.scroll_down()
-        elif button == 3:
-            self.command_down(display, x, y)
-        elif button == 4: self.scroll_down()
-        elif button == 5: self.scroll_up()
-        else:
-            print button
+    def scroll_up(self):
+        if self.at_line < len(self.lines) - 1:
+            self._fade_command()
+            self.at_line += 1
+            self.body_surface.scroll(0, -FONT.line_h)
+            row = self.h_in_lines + self.at_line
+            self._redraw_line(row)
+            self._redraw_line(row + 1)
+            self.cursor.draw()
 
+    def scroll_down(self):
+        if self.at_line:
+            self._fade_command()
+            self.at_line -= 1
+            self.body_surface.scroll(0, FONT.line_h)
+            self._redraw_line(self.at_line)
+            self.cursor.draw()
 
     def command_down(self, display, x, y):
-        # figure out the word under the mouse, if any
-        # if display.lookup(word):
-        #     underline the word
-        #     self.command = word, 
-        pass
+        if self.command_rect and self.command_rect.collidepoint(x, y):
+            return
+        self._fade_command()
+        line, column, row = self.at(x, y)
+        word_start = line.rfind(' ', 0, column) + 1
+        word_end = line.find(' ', column)
+        if word_end == -1: word_end = len(line)
+        word = line[word_start:word_end]
+        if not _is_command(display, word):
+            return
+        r = self.command_rect = pygame.Rect(
+            word_start * FONT.char_w, # x
+            y / FONT.line_h * FONT.line_h, # y
+            len(word) * FONT.char_w, # w
+            FONT.line_h # h
+            )
+        pygame.draw.aaline(self.body_surface, FG, r.bottomleft, r.bottomright)
+        self.command = word
+
+    def command_up(self, display):
+        if self.command:
+            command = self.command
+            self._fade_command()
+            display.broadcast(CommandMessage(self, command))
+
+    def _fade_command(self):
+        self.command = None
+        r, self.command_rect = self.command_rect, None
+        if r:
+            pygame.draw.line(self.body_surface, BG, r.bottomleft, r.bottomright)
 
     def at(self, x, y):
         '''
@@ -247,6 +264,20 @@ class TextViewer(MenuViewer):
             column = min(x / FONT.char_w, len(line))
         return line, column, row
 
+    def body_click(self, display, x, y, button):
+        if button == 1:
+            line, column, row = self.at(x, y)
+            self.cursor.set_to(column, row)
+        elif button == 2:
+            if pygame.KMOD_SHIFT & pygame.key.get_mods():
+                self.scroll_up()
+            else:
+                self.scroll_down()
+        elif button == 3:
+            self.command_down(display, x, y)
+        elif button == 4: self.scroll_down()
+        elif button == 5: self.scroll_up()
+
     def menu_click(self, display, x, y, button):
         if MenuViewer.menu_click(self, display, x, y, button):
             return True
@@ -254,6 +285,8 @@ class TextViewer(MenuViewer):
     def mouse_up(self, display, x, y, button):
         if MenuViewer.mouse_up(self, display, x, y, button):
             return True
+        elif button == 3 and self.body_rect.collidepoint(x, y):
+            self.command_up(display)
 
     def mouse_motion(self, display, x, y, rel_x, rel_y, button0, button1, button2):
         if MenuViewer.mouse_motion(self, display, x, y, rel_x, rel_y,
@@ -266,6 +299,9 @@ class TextViewer(MenuViewer):
             bx, by = self.body_rect.topleft
             line, column, row = self.at(x - bx, y - by)
             self.cursor.set_to(column, row)
+        elif button2 and self.body_rect.collidepoint(x, y):
+            bx, by = self.body_rect.topleft
+            self.command_down(display, x - bx, y - by)
 
     def key_down(self, display, uch, key, mod):
 

@@ -27,8 +27,8 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Command evaluation
-  * Menu text, commands and name or title
+* "print" to e.g. log
+* Menu text, commands and name or title
 * Selecting text
   * Cut/Copy/Paste
 * Home/End keys
@@ -39,6 +39,7 @@ Still to do:
 * Tab key?
 
 Done:
+- Command evaluation
 - Joy integration
 - Persistance of data
 - Content change notification

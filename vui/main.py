@@ -2,12 +2,14 @@
 import os, pickle, sys, traceback
 
 import pygame
+import core
+reload(core)
 import display
 reload(display)
 import text_viewer
 reload(text_viewer)
-from core import TheLoop, World, ALLOWED_EVENTS
-from persist_task import PersistTask
+import persist_task
+reload(persist_task)
 
 from joy.library import initialize
 
@@ -48,8 +50,8 @@ def init():
     screen = pygame.display.set_mode((1024, 768))
     clock = pygame.time.Clock()
     pygame.event.set_allowed(None)
-    pygame.event.set_allowed(ALLOWED_EVENTS)
-    pt = PersistTask(JOY_HOME)
+    pygame.event.set_allowed(core.ALLOWED_EVENTS)
+    pt = persist_task.PersistTask(JOY_HOME)
     A = screen, clock, pt
     return A
 
@@ -69,9 +71,9 @@ def main():
     global d
     screen, clock, pt = init()
     d = display.Display(screen, D.__contains__, 89, 144)
-    loop = TheLoop(d, clock)
+    loop = core.TheLoop(d, clock)
     content_id, stack_holder = pt.open('stack.pickle')
-    world = World(stack_holder, D, d.broadcast, content_id)
+    world = core.World(stack_holder, D, d.broadcast, content_id)
     loop.install_task(pt.task_run, 2000)  # save files every two seconds
     d.handlers.append(pt.handle)
     d.handlers.append(world.handle)
