@@ -27,7 +27,6 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Joy integration
 * Command evaluation
   * Menu text, commands and name or title
 * Selecting text
@@ -35,16 +34,17 @@ Still to do:
 * Home/End keys
 * Vertical scrolling w/ scrollbar
 * Horizontal scrolling w/ keys
-* Horizontal scrolling w/ scrollbar
+* Horizontal scrolling w/ scrollbar?
 * Pgup/down keys?
 * Tab key?
 
 Done:
+- Joy integration
 - Persistance of data
 - Content change notification
 - Vertical scrolling w/ keys
 - Enter/return key
-- Arrow keys should wrap at line ends
+- Arrow keys wrap at line ends
 - Backspace/delete wrap at line ends
 
 '''
