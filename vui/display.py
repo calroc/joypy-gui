@@ -27,9 +27,7 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Local library auto-loaded at start-time
-  * primitives in Python
-  - definitions.txt
+* "shutdown" signal to tell PT to commit outstanding changes.
 * A way to open a default viewer (in case you close them all.)
 * Return key can orphan a line at the bottom of a viewer.
 * Redirect stdout to "print" to the log.
@@ -42,11 +40,14 @@ Still to do:
 * Horizontal scrolling w/ scrollbar?
 * Pgup/down keys?
 * Tab key?
-* If you have a viewer on an unstored string(list) need a way to name and persist it.
 * When moving viewers sometimes a command gets executed from the underlying
     viewer.  This shouldn't happen.
 
 Done:
+- Local library auto-loaded at start-time
+  - library.py, primitives in Python
+  - definitions.txt
+- Can name and persist a viewer on an unstored string(list).
 - Inscribe function
 - Reverse video, well, grey background, menu bars
 - PT scans JOY_HOME for resource lists

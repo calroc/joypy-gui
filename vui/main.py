@@ -15,7 +15,7 @@ if JOY_HOME is None:
         raise ValueError('what directory?')
 
 
-def init_text(display, pt, x, y, title, filename):
+def init_text(display, pt, x, y, filename):
     viewer = display.open_viewer(x, y, text_viewer.TextViewer)
     viewer.content_id, viewer.lines = pt.open(filename)
     viewer.draw()
@@ -27,6 +27,12 @@ def load_definitions(pt, dictionary):
     for line in lines:
         if '==' in line:
             DefinitionWrapper.add_def(line, dictionary)
+
+
+def load_primitives(home, name_space):
+    fn = os.path.join(home, 'library.py')
+    if os.path.exists(fn):
+        execfile(fn, name_space)
 
 
 def init():
@@ -53,8 +59,8 @@ def init_context(screen, clock, pt):
         )
     d.register_commands(D)
     pt.register_commands(D)
-    log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
-    t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
+    log = init_text(d, pt, 0, 0, 'log.txt')
+    t = init_text(d, pt, d.w / 2, 0, 'scratch.txt')
     loop = core.TheLoop(d, clock)
     stack_id, stack_holder = pt.open('stack.pickle')
     world = core.World(stack_id, stack_holder, D, d.broadcast, log)
@@ -78,6 +84,7 @@ def error_guard(loop, n=10):
 
 def main(screen, clock, pt):
     name_space = init_context(screen, clock, pt)
+    load_primitives(pt.home, name_space.copy())
 
     @SimpleFunctionWrapper
     def evaluate(stack):
