@@ -2,8 +2,8 @@
 import os, pickle, sys, traceback
 
 import pygame
-import viewer
-reload(viewer)
+import display
+reload(display)
 import text_viewer
 reload(text_viewer)
 from core import TheLoop, ALLOWED_EVENTS
@@ -115,7 +115,7 @@ d = None
 def main():
     global d
     screen, clock, pt = init()
-    d = viewer.Display(screen, 89, 144)
+    d = display.Display(screen, 89, 144)
     loop = TheLoop(d, clock)
     loop.install_task(pt.task_run, 2000)  # save files every two seconds
     d.handlers.append(pt.handle)
