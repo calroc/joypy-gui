@@ -27,7 +27,8 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Capture and display tracebacks
+* PT should scan JOY_HOME for resources at startup.
+* Inscribe function
 * System query for most recent selection
 * Home/End keys
 * Vertical scrolling w/ scrollbar
@@ -41,6 +42,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- Capture and display tracebacks
 - StackViewer
 - Update log when stack changes
 - Open a resource list
@@ -62,10 +64,12 @@ Done:
 
 '''
 from copy import copy
+from sys import stderr
+from traceback import format_exc
 import pygame
 from joy.library import SimpleFunctionWrapper
-from core import (OpenMessage, SUCCESS,
-    BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS)
+from core import (OpenMessage, CommandMessage, SUCCESS,
+    push, BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS)
 from viewer import Viewer
 import text_viewer, stack_viewer
 
@@ -320,42 +324,51 @@ class Display(object):
         '''
         Display event handling.
         '''
-        # Keyboard events.
-        if event.type == pygame.KEYUP:
-            if self.focused_viewer:
-                self.focused_viewer.key_up(self, event.key, event.mod)
-            return
-        if event.type == pygame.KEYDOWN:
-            if self.focused_viewer:
-                self.focused_viewer.key_down(
-                    self, event.unicode, event.key, event.mod)
-            return
+        try:
+            # Keyboard events.
+            if event.type == pygame.KEYUP:
+                if self.focused_viewer:
+                    self.focused_viewer.key_up(self, event.key, event.mod)
+                return
+            if event.type == pygame.KEYDOWN:
+                if self.focused_viewer:
+                    self.focused_viewer.key_down(
+                        self, event.unicode, event.key, event.mod)
+                return
 
-        # Mouse events.
-        assert event.type in MOUSE_EVENTS  # Use pygame.event.set_allowed().
+            # Mouse events.
+            assert event.type in MOUSE_EVENTS  # Use pygame.event.set_allowed().
 
-        V, x, y = self.at(*event.pos)
+            V, x, y = self.at(*event.pos)
 
-        if event.type == pygame.MOUSEMOTION:
-            if not isinstance(V, Track):
-                V.mouse_motion(self, x, y, *(event.rel + event.buttons))
+            if event.type == pygame.MOUSEMOTION:
+                if not isinstance(V, Track):
+                    V.mouse_motion(self, x, y, *(event.rel + event.buttons))
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            self.focus(V)
-            V.mouse_down(self, x, y, event.button)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.focus(V)
+                V.mouse_down(self, x, y, event.button)
 
-        elif event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pygame.MOUSEBUTTONUP:
 
-            # Check for moving viewer.
-            if (event.button == 2
-                and self.focused_viewer
-                and V is not self.focused_viewer
-                and V.MINIMUM_HEIGHT < y < V.h - self.focused_viewer.MINIMUM_HEIGHT
-                ):
-                self._move_viewer(V, y, self.focused_viewer, *event.pos)
+                # Check for moving viewer.
+                if (event.button == 2
+                    and self.focused_viewer
+                    and V is not self.focused_viewer
+                    and V.MINIMUM_HEIGHT < y < V.h - self.focused_viewer.MINIMUM_HEIGHT
+                    ):
+                    self._move_viewer(V, y, self.focused_viewer, *event.pos)
 
-            else:
-                V.mouse_up(self, x, y, event.button)
+                else:
+                    V.mouse_up(self, x, y, event.button)
+
+        # Catch all exceptions and open a viewer.
+        except:
+            err = format_exc()
+            print >> stderr, err # Too be safe, just print it right away.
+            push(self, err, self.broadcast)
+            command = 'good_viewer_location open_viewer'
+            self.broadcast(CommandMessage(self, command))
 
 
 class Track(Viewer):

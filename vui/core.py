@@ -174,3 +174,35 @@ class TheLoop(object):
                     self.display.dispatch_event(event)
             pygame.display.update()
             self.clock.tick(self.FRAME_RATE)
+
+
+def push(sender, item, notify, stack_name='stack.pickle'):
+    om = OpenMessage(sender, stack_name)
+    notify(om)
+    if om.status == SUCCESS:
+        om.thing[0] = item, om.thing[0]
+        notify(ModifyMessage(sender, om.thing, content_id=om.content_id))
+    return om.status
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

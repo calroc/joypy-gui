@@ -9,6 +9,7 @@ from core import (
     ModifyMessage,
     OpenMessage,
     SUCCESS,
+    push,
     )
 import viewer
 reload(viewer)
@@ -421,14 +422,15 @@ class TextViewer(MenuViewer):
                 self._redraw_line(r)
 
     def _copy_selection(self, display):
-        om = OpenMessage(self, 'stack.pickle')
-        display.broadcast(om)
-        if om.status == SUCCESS:
-            selection = self._get_selection()
-            om.thing[0] = selection, om.thing[0]
-            display.broadcast(ModifyMessage(
-                self, om.thing, content_id=om.content_id))
+        if push(self, self._get_selection(), display.broadcast) == SUCCESS:
             return True
+##        om = OpenMessage(self, 'stack.pickle')
+##        display.broadcast(om)
+##        if om.status == SUCCESS:
+##            selection = self._get_selection()
+##            om.thing[0] = selection, om.thing[0]
+##            display.broadcast(ModifyMessage(
+##                self, om.thing, content_id=om.content_id))
 
     def _parse_selection(self, display):
         if self._has_selection():
