@@ -27,6 +27,8 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
+* Copy/Cut update log
+* StackViewer
 * Capture and display tracebacks
 * System query for most recent selection
 * Home/End keys

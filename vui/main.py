@@ -70,7 +70,6 @@ def error_guard(loop, n=10):
 
 
 def init_context(screen, clock, pt):
-    global D
     d = display.Display(screen, D.__contains__, 89, 144)
     d.register_commands(D)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
@@ -86,6 +85,7 @@ def main():
     global d
     screen, clock, pt = init()
     name_space = init_context(screen, clock, pt)
+    name_space['D'] = D
     loop = name_space['loop']
     d = name_space['d']
     world = name_space['world']
@@ -97,7 +97,7 @@ def main():
     def evaluate(stack):
         code, stack = stack
         assert isinstance(code, str), repr(code)
-        exec code in {}, name_space
+        exec code in name_space.copy()
         return stack
     D['evaluate'] = evaluate
         

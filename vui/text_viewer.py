@@ -461,7 +461,7 @@ class TextViewer(MenuViewer):
             lines.append(line[scolumn:e])
             scolumn = 0
             srow += 1
-        return '\n'.join(lines)
+        return str('\n'.join(lines))
 
     def _selection_coords(self):
         (srow, scolumn), (erow, ecolumn) = (
