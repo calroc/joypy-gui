@@ -9,16 +9,8 @@ for name in 'core display viewer text_viewer stack_viewer persist_task'.split():
         pass
 
 import pygame
-import core
-#reload(core)
-import display
-#reload(display)
-import text_viewer
-#reload(text_viewer)
-import persist_task
-#reload(persist_task)
-
 from joy.library import initialize, SimpleFunctionWrapper
+import core, display, text_viewer, persist_task
 
 
 FULLSCREEN = '-f' in sys.argv

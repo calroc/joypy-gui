@@ -24,7 +24,12 @@ SELECTION_KEYS = {
     pygame.K_F2,
     pygame.K_F3,
     pygame.K_F4,
+    }
+STACK_CHATTER_KEYS = {
     pygame.K_F5,
+    pygame.K_F6,
+    pygame.K_F7,
+    pygame.K_F8,
     }
 
 
@@ -363,7 +368,9 @@ class TextViewer(MenuViewer):
         if key in SELECTION_KEYS:
             self._selection_key(display, key, mod)
             return
-
+        if key in STACK_CHATTER_KEYS:
+            self._stack_chatter_key(display, key, mod)
+            return
         if key in ARROW_KEYS:
             self._arrow_key(key, mod)
             return
@@ -393,6 +400,31 @@ class TextViewer(MenuViewer):
                 self, self.lines, content_id=self.content_id)
             display.broadcast(message)
 
+    def _stack_chatter_key(self, display, key, mod):
+        if key == pygame.K_F5:
+            if mod & pygame.KMOD_SHIFT:
+                command = 'roll<'
+            else:
+                command = 'swap'
+        elif key == pygame.K_F6:
+            if mod & pygame.KMOD_SHIFT:
+                command = 'roll>'
+            else:
+                command = 'dup'
+        elif key == pygame.K_F7:
+            if mod & pygame.KMOD_SHIFT:
+                command = 'tuck'
+            else:
+                command = 'over'
+##        elif key == pygame.K_F8:
+##            if mod & pygame.KMOD_SHIFT:
+##                command = ''
+##            else:
+##                command = ''
+        else:
+            return
+        display.broadcast(CommandMessage(self, command))
+
     # Selection Handling
 
     def _selection_key(self, display, key, mod):
@@ -415,8 +447,6 @@ class TextViewer(MenuViewer):
                 self._delete_selection(display)
             else:
                 self._cut_selection(display)
-        elif key == pygame.K_F5: # unset selection
-            self._sel_start = self._sel_end = None
         self.cursor.draw()
 
     def _deselect(self):
