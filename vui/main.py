@@ -73,7 +73,8 @@ def main():
     screen, clock, pt = init()
     d = display.Display(screen, D.__contains__, 89, 144)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
-    t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
+    t = init_text(d, pt, 0, d.h / 2, 'Joy', 'scratch.txt')
+##    t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
     loop = core.TheLoop(d, clock)
     stack_id, stack_holder = pt.open('stack.pickle')
     world = core.World(stack_id, stack_holder, D, d.broadcast, log)
@@ -81,7 +82,10 @@ def main():
     d.handlers.append(pt.handle)
     d.handlers.append(world.handle)
     error_guard(loop.loop)
+    return t
 
 
 if __name__ == '__main__':
-  main()
+    #import cProfile
+    t = main()
+    #cProfile.run('d.change_viewer(t, 25, True)')

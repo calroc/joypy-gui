@@ -67,6 +67,10 @@ FONT = Font()
 
 class TextViewer(MenuViewer):
 
+    MINIMUM_HEIGHT = FONT.line_h + 3
+    CLOSE_TEXT = FONT.render('close')
+    GROW_TEXT = FONT.render('grow')
+
     class Cursor(object):
 
         def __init__(self, viewer):
@@ -153,6 +157,12 @@ class TextViewer(MenuViewer):
     def resurface(self, surface):
         self.cursor.fade()
         MenuViewer.resurface(self, surface)
+
+        w, h = self.CLOSE_TEXT.get_size()
+        self.close_rect = pygame.rect.Rect(self.w - 2 - w, 1, w, h)
+        w, h = self.GROW_TEXT.get_size()
+        self.grow_rect = pygame.rect.Rect(1, 1, w, h)
+
         self.body_surface = surface.subsurface(self.body_rect)
         self.line_w = self.body_rect.w / FONT.char_w + 1
         self.h_in_lines = self.body_rect.h / FONT.line_h - 1
@@ -168,7 +178,11 @@ class TextViewer(MenuViewer):
             self.draw_body()
 
     def draw_menu(self):
-        MenuViewer.draw_menu(self)
+        #MenuViewer.draw_menu(self)
+        self.surface.blit(self.GROW_TEXT, (1, 1))
+        self.surface.blit(self.CLOSE_TEXT,
+                          (self.w - 2 - self.CLOSE_TEXT.get_width(), 1))
+        
 
     def draw_body(self):
         MenuViewer.draw_body(self)
