@@ -1,11 +1,14 @@
 import string
 import pygame
+from joy.utils.stack import stack_to_string
 from core import (
     ARROW_KEYS,
     BACKGROUND as BG,
     FOREGROUND as FG,
     CommandMessage,
     ModifyMessage,
+    OpenMessage,
+    SUCCESS,
     )
 import viewer
 reload(viewer)
@@ -362,6 +365,8 @@ class TextViewer(MenuViewer):
             modified = self._backspace_key(mod, line, i)
         elif key == pygame.K_DELETE:
             modified = self._delete_key(mod, line, i)
+        elif key == pygame.K_INSERT:
+            modified = self._insert_key(display, mod, line, i)
         elif uch and uch in FONT or uch == ' ':
             self._printable_key(uch, mod, line, i)
             modified = True
@@ -381,20 +386,21 @@ class TextViewer(MenuViewer):
     def _selection_key(self, display, key, mod):
         self.cursor.fade()
         self._deselect()
-        if key == pygame.K_F1:
+        if key == pygame.K_F1: # set sel start
             self._sel_start = self.cursor.y, self.cursor.x
             self._update_selection()
-        elif key == pygame.K_F2:
+        elif key == pygame.K_F2: # set sel end
             self._sel_end = self.cursor.y, self.cursor.x
             self._update_selection()
-        elif key == pygame.K_F3:
+        elif key == pygame.K_F3: # copy
             self._copy_selection(display)
-        elif key == pygame.K_F4:
+            self._update_selection()
+        elif key == pygame.K_F4: # cut or delete
             if mod & pygame.KMOD_SHIFT:
                 self._delete_selection(display)
             else:
                 self._cut_selection(display)
-        elif key == pygame.K_F5:
+        elif key == pygame.K_F5: # unset selection
             self._sel_start = self._sel_end = None
         self.cursor.draw()
 
@@ -406,13 +412,17 @@ class TextViewer(MenuViewer):
                 self._redraw_line(r)
 
     def _copy_selection(self, display):
-        selection = self._get_selection()
-        display.broadcast(CommandMessage(self, repr(selection)))
+        om = OpenMessage(self, 'stack.pickle')
+        display.broadcast(om)
+        if om.status == SUCCESS:
+            selection = self._get_selection()
+            om.thing[0] = selection, om.thing[0]
+            return True
 
     def _cut_selection(self, display):
         if self._has_selection():
-            self._copy_selection(display)
-            self._delete_selection(display)
+            if self._copy_selection(display):
+                self._delete_selection(display)
 
     def _delete_selection(self, display):
         if not self._has_selection():
@@ -576,3 +586,46 @@ class TextViewer(MenuViewer):
         else:
             self.draw_body()
             self.cursor.draw()
+
+    def _insert_key(self, display, mod, line, i):
+            om = OpenMessage(self, 'stack.pickle')
+            display.broadcast(om)
+            if om.status != SUCCESS:
+                return
+            stack = om.thing[0]
+            if stack:
+                content = stack[0]
+                if isinstance(content, tuple):
+                    content = '[%s]' % stack_to_string(s)
+                else:
+                    content = str(content)
+                if self.insert(content):
+                    if mod & pygame.KMOD_SHIFT:
+                        display.broadcast(CommandMessage(self, 'pop'))
+                    return True
+
+    def insert(self, content):
+        assert isinstance(content, basestring), repr(content)
+        if content:
+            self.cursor.fade()
+            row, column = self.cursor.y, self.cursor.x
+            line = self.lines[row]
+            lines = (line[:column] + content + line[column:]).splitlines()
+            self.lines[row:row + 1] = lines
+            self.draw_body()
+            self.cursor.y = row + len(lines) - 1
+            self.cursor.x = len(lines[-1]) - len(line) + column
+            self.cursor.draw()
+            return True
+
+
+
+
+
+
+
+
+
+
+
+

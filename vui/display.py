@@ -27,9 +27,7 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* open a resource list
-* capture and display tracebacks
-* Paste
+* Capture and display tracebacks
 * System query for most recent selection
 * Home/End keys
 * Vertical scrolling w/ scrollbar
@@ -40,8 +38,10 @@ Still to do:
 * Tab key?
 
 Done:
+- open a resource list
 - Selecting text
 -   Copy and Cut
+-   Paste
 - Menu text, commands and name or title
 - "print" to e.g. log
 - Command evaluation
