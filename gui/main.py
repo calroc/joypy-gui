@@ -171,7 +171,7 @@ tb.update({
   })
 
 
-defaults = dict(text_bindings=tb, width=80, height=50)
+defaults = dict(text_bindings=tb, width=80, height=25)
 
 
 D = initialize()
