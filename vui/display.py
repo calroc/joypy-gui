@@ -22,17 +22,15 @@ This module implements a simple visual display system modeled on Oberon.
 
 Refer to Chapter 4 of the Project Oberon book for more information.
 
-There is a Display object that manages a pygame surface and N  vertical
+There is a Display object that manages a pygame surface and N vertical
 tracks each of which manages zero or more viewers.
 
 
 Still to do:
 * open a resource list
-* Menu text, commands and name or title
 * capture and display tracebacks
-* Selecting text
-  * Cut/Copy/Paste
-  * System query for most recent selection
+* Paste
+* System query for most recent selection
 * Home/End keys
 * Vertical scrolling w/ scrollbar
 * Shift-scroll changes viewer height?
@@ -42,6 +40,9 @@ Still to do:
 * Tab key?
 
 Done:
+- Selecting text
+-   Copy and Cut
+- Menu text, commands and name or title
 - "print" to e.g. log
 - Command evaluation
 - Joy integration

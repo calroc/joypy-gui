@@ -189,11 +189,16 @@ class TextViewer(MenuViewer):
             # TODO: check self.at_line
             self.draw_body()
 
+    # Drawing
+
     def draw_menu(self):
         #MenuViewer.draw_menu(self)
         self.surface.blit(self.GROW_TEXT, (1, 1))
         self.surface.blit(self.CLOSE_TEXT,
-                          (self.w - 2 - self.CLOSE_TEXT.get_width(), 1))
+                          (self.w - 2 - self.close_rect.w, 1))
+        if self.content_id:
+            self.surface.blit(FONT.render(self.content_id),
+                          (self.grow_rect.w + FONT.char_w + 3, 1))
         
 
     def draw_body(self):
@@ -214,6 +219,8 @@ class TextViewer(MenuViewer):
             n = self.line_w - len(line)
             if n > 0: line = line + ' ' * n
         self.draw_line(self.cursor.screen_y(row), line)
+
+    # General Functionality
 
     def focus(self):
         self.cursor.v = self
@@ -292,6 +299,8 @@ class TextViewer(MenuViewer):
             column = min(x / FONT.char_w, len(line))
         return line, column, row
 
+    # Event Processing
+
     def body_click(self, display, x, y, button):
         if button == 1:
             line, column, row = self.at(x, y)
@@ -367,6 +376,8 @@ class TextViewer(MenuViewer):
                 self, self.lines, content_id=self.content_id)
             display.broadcast(message)
 
+    # Selection Handling
+
     def _selection_key(self, display, key, mod):
         self.cursor.fade()
         self._deselect()
@@ -407,18 +418,14 @@ class TextViewer(MenuViewer):
         if not self._has_selection():
             return
         self.cursor.fade()
-        print 1
         srow, scolumn, erow, ecolumn = self._selection_coords()
         if srow == erow:
-            print 2
             line = self.lines[srow]
             self.lines[srow] = line[:scolumn] + line[ecolumn:]
         else:
-            print 3
             left = self.lines[srow][:scolumn]
             right = self.lines[erow][ecolumn:]
             self.lines[srow:erow + 1] = [left + right]
-        print 4
         self.draw_body()
         self.cursor.set_to(srow, scolumn)
         display.broadcast(ModifyMessage(
@@ -501,6 +508,8 @@ class TextViewer(MenuViewer):
                     len(line) * FONT.char_w,
                     FONT.line_h
                     )
+
+    # Key Handlers
 
     def _printable_key(self, uch, mod, line, i):
         line = line[:i] + uch + line[i:]
