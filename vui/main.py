@@ -29,7 +29,10 @@ def init_text(display, pt, x, y, title, filename):
     return viewer
 
 
-D = initialize()
+try:
+    D = D
+except NameError:
+    D = initialize()
 ##for func in ():
 ##  D[func.__name__] = func
 
@@ -52,6 +55,7 @@ def init():
     pygame.event.set_allowed(None)
     pygame.event.set_allowed(core.ALLOWED_EVENTS)
     pt = persist_task.PersistTask(JOY_HOME)
+    pt.register_commands(D)
     A = screen, clock, pt
     return A
 
@@ -72,6 +76,7 @@ def main():
     global d
     screen, clock, pt = init()
     d = display.Display(screen, D.__contains__, 89, 144)
+    d.register_commands(D)
     log = init_text(d, pt, 0, 0, 'Log', 'log.txt')
     t = init_text(d, pt, d.w / 2, 0, 'Joy', 'scratch.txt')
     loop = core.TheLoop(d, clock)

@@ -2,6 +2,7 @@ import os, pickle, traceback
 from collections import Counter
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
+from joy.library import SimpleFunctionWrapper
 import core
 
 
@@ -120,6 +121,15 @@ class PersistTask(object):
 
     def commit(self, message='auto-commit'):
         return self.repo.do_commit(message, committer=core.COMMITTER)
+
+    def register_commands(self, D):
+
+        @SimpleFunctionWrapper
+        def list_resources(stack):
+            return '\n'.join(sorted(self.store)), stack
+
+        D['list_resources'] = list_resources
+        
 
 
 if __name__ == '__main__':

@@ -104,11 +104,19 @@ class World(object):
         self.notify(mm)
 
     def format_log_output(self, command):
+        err = None
+        try:
+            s = stack_to_string(self.stack_holder[0])
+        except:
+            err = format_exc()
+            s = str(self.stack_holder[0])
+        if err:
+            print >> stderr, err
         return ('''
 joy? %s
 
 %s <-
-''' % (command, stack_to_string(self.stack_holder[0]))).splitlines()
+''' % (command, s)).splitlines()
 
 
 # main loop

@@ -57,8 +57,10 @@ Done:
 '''
 from copy import copy
 import pygame
+from joy.library import SimpleFunctionWrapper
 from core import BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS
 from viewer import Viewer
+import text_viewer
 
 
 class Display(object):
@@ -229,6 +231,35 @@ class Display(object):
         track, x = self._track_at(x)
         viewer, y = track.viewer_at(y)
         return viewer, x, y
+
+    def iter_viewers(self):
+        for x, T in self.tracks:
+            for y, V in T.viewers:
+                yield V, x, y
+
+    def register_commands(self, D):
+
+        @SimpleFunctionWrapper
+        def good_viewer_location(stack):
+            viewers = list(self.iter_viewers())
+            if viewers:
+                viewers.sort(key=lambda (V, x, y): V.w * V.h)
+                V, x, y = viewers[-1]
+                coords = (x + 1, (y + V.h / 2, ()))
+            else:
+                coords = (0, (0, ()))
+            return coords, stack
+
+        @SimpleFunctionWrapper
+        def open_viewer(stack):
+            ((x, (y, _)), (content, stack)) = stack
+            V = self.open_viewer(x, y, text_viewer.TextViewer)
+            V.lines = content.splitlines()
+            V.draw()
+            return stack
+
+        D['good_viewer_location'] = good_viewer_location
+        D['open_viewer'] = open_viewer
 
     def done_resizing(self):
         for _, track in self.tracks:
