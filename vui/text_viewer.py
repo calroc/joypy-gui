@@ -14,6 +14,16 @@ reload(viewer)
 MenuViewer = viewer.MenuViewer
 
 
+SELECTION_COLOR = 235, 255, 0, 32
+SELECTION_KEYS = {
+    pygame.K_F1,
+    pygame.K_F2,
+    pygame.K_F3,
+    pygame.K_F4,
+    pygame.K_F5,
+    }
+
+
 def _is_command(display, word):
     return display.lookup(word) or word.isdigit() or all(
         not s or s.isdigit() for s in word.split('.', 1)
@@ -153,6 +163,7 @@ class TextViewer(MenuViewer):
         self.at_line = 0
         self.bg = BG
         self.command = None
+        self._sel_start = self._sel_end = None
 
     def resurface(self, surface):
         self.cursor.fade()
@@ -167,6 +178,7 @@ class TextViewer(MenuViewer):
         self.line_w = self.body_rect.w / FONT.char_w + 1
         self.h_in_lines = self.body_rect.h / FONT.line_h - 1
         self.command_rect = self.command = None
+        self._sel_start = self._sel_end = None
 
     def handle(self, message):
         if super(TextViewer, self).handle(message):
@@ -213,6 +225,8 @@ class TextViewer(MenuViewer):
     def scroll_up(self):
         if self.at_line < len(self.lines) - 1:
             self._fade_command()
+            self._deselect()
+            self._sel_start = self._sel_end = None
             self.at_line += 1
             self.body_surface.scroll(0, -FONT.line_h)
             row = self.h_in_lines + self.at_line
@@ -223,6 +237,8 @@ class TextViewer(MenuViewer):
     def scroll_down(self):
         if self.at_line:
             self._fade_command()
+            self._deselect()
+            self._sel_start = self._sel_end = None
             self.at_line -= 1
             self.body_surface.scroll(0, FONT.line_h)
             self._redraw_line(self.at_line)
@@ -315,18 +331,25 @@ class TextViewer(MenuViewer):
             bx, by = self.body_rect.topleft
             self.command_down(display, x - bx, y - by)
 
+    def close(self):
+        self._sel_start = self._sel_end = None
+
     def key_down(self, display, uch, key, mod):
+
+        if key in SELECTION_KEYS:
+            self._selection_key(key, mod)
+            return
+        # The selection is fragile.
+        self._deselect()
+        self._sel_start = self._sel_end = None
 
         if key in ARROW_KEYS:
             self._arrow_key(key, mod)
             return
-
         line, i = self.lines[self.cursor.y], self.cursor.x
 
         modified = ()
-        if key == pygame.K_r:
-            display.broadcast(CommandMessage(self, '23'))
-        elif key == pygame.K_RETURN:
+        if key == pygame.K_RETURN:
             self._return_key(mod, line, i)
             modified = True
         elif key == pygame.K_BACKSPACE:
@@ -343,6 +366,84 @@ class TextViewer(MenuViewer):
             message = ModifyMessage(
                 self, self.lines, content_id=self.content_id)
             display.broadcast(message)
+
+    def _selection_key(self, key, mod):
+        self.cursor.fade()
+        self._deselect()
+        if key == pygame.K_F1:
+            self._sel_start = self.cursor.y, self.cursor.x
+            self._update_selection()
+        elif key == pygame.K_F2:
+            self._sel_end = self.cursor.y, self.cursor.x
+            self._update_selection()
+        elif key == pygame.K_F5:
+            self._sel_start = self._sel_end = None
+        self.cursor.draw()
+
+    def _deselect(self):
+        if (not (self._sel_start and self._sel_end)
+            or self._sel_start == self._sel_end
+            ):
+            return
+        srow, erow = self._sel_start[0], self._sel_end[0]
+        # Just erase the whole selection.
+        for r in range(min(srow, erow), max(srow, erow) + 1):
+            self._redraw_line(r)
+
+    def _update_selection(self):
+        if self._sel_start is None and self._sel_end:
+            self._sel_start = self._sel_end
+        elif self._sel_end is None and self._sel_start:
+            self._sel_end = self._sel_start
+        assert self._sel_start and self._sel_end
+        if self._sel_start == self._sel_end:
+            print 'no selection'
+            return
+        start, end = (
+            min(self._sel_start, self._sel_end),
+            max(self._sel_start, self._sel_end)
+            )
+        self._highlight(start, end)
+
+    def _highlight(self, (start_row, start_column), (end_row, end_column)):
+        for rect in self._iter_selection_rectangles(
+            start_row, start_column, end_row, end_column
+            ):
+            self.body_surface.fill(SELECTION_COLOR, rect, pygame.BLEND_RGBA_MULT)
+
+    def _iter_selection_rectangles(self, srow, scolumn, erow, ecolumn):
+        if srow == erow:
+            yield (
+                scolumn * FONT.char_w,
+                self.cursor.screen_y(srow),
+                (ecolumn - scolumn) * FONT.char_w,
+                FONT.line_h
+                )
+            return
+        lines = self.lines[srow:erow + 1]
+        assert len(lines) >= 2
+        first_line, last_line = lines[0], lines[-1]
+        yield (
+            scolumn * FONT.char_w,
+            self.cursor.screen_y(srow),
+            (len(first_line) - scolumn) * FONT.char_w,
+            FONT.line_h
+            )
+        yield (
+            0,
+            self.cursor.screen_y(erow),
+            ecolumn * FONT.char_w,
+            FONT.line_h
+            )
+        if len(lines) > 2:
+            for line in lines[1:-1]:
+                srow += 1
+                yield (
+                    0,
+                    self.cursor.screen_y(srow),
+                    len(line) * FONT.char_w,
+                    FONT.line_h
+                    )
 
     def _printable_key(self, uch, mod, line, i):
         line = line[:i] + uch + line[i:]
