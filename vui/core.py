@@ -74,7 +74,7 @@ class OpenMessage(Message):
     def __init__(self, sender, name):
         Message.__init__(self, sender)
         self.name = name
-        self.content_id = self.lines = None
+        self.content_id = self.thing = None
         self.status = PENDING
         self.traceback = None
 
@@ -113,7 +113,7 @@ class World(object):
         if err:
             print >> stderr, err
         return ('''
-joy? %s
+-> %s
 
 %s <-
 ''' % (command, s)).splitlines()

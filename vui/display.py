@@ -58,7 +58,8 @@ Done:
 from copy import copy
 import pygame
 from joy.library import SimpleFunctionWrapper
-from core import BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS
+from core import (OpenMessage, SUCCESS,
+    BACKGROUND, FOREGROUND, GREY, MOUSE_EVENTS)
 from viewer import Viewer
 import text_viewer
 
@@ -258,8 +259,20 @@ class Display(object):
             V.draw()
             return stack
 
+        @SimpleFunctionWrapper
+        def open_resource(stack):
+            ((x, (y, _)), (name, stack)) = stack
+            om = OpenMessage(self, name)
+            self.broadcast(om)
+            if om.status == SUCCESS:
+                V = self.open_viewer(x, y, text_viewer.TextViewer)
+                V.content_id, V.lines = om.content_id, om.thing
+                V.draw()
+            return stack
+
         D['good_viewer_location'] = good_viewer_location
         D['open_viewer'] = open_viewer
+        D['open_resource'] = open_resource
 
     def done_resizing(self):
         for _, track in self.tracks:
