@@ -9,7 +9,7 @@ for name in 'core display viewer text_viewer stack_viewer persist_task'.split():
         pass
 
 import pygame
-from joy.library import initialize, SimpleFunctionWrapper
+from joy.library import initialize, DefinitionWrapper, SimpleFunctionWrapper
 from joy.utils.stack import list_to_stack
 import core, display, text_viewer, persist_task
 
@@ -32,17 +32,21 @@ def init_text(display, pt, x, y, title, filename):
     return viewer
 
 
-try:
-    D = D
-except NameError:
-    D = initialize()
+def load_definitions(pt, dictionary):
+    lines = pt.open('definitions.txt')[1]
+    for line in lines:
+        if '==' in line:
+            DefinitionWrapper.add_def(line, dictionary)
 
-    @SimpleFunctionWrapper
-    def splitlines(stack):
-        text, stack = stack
-        assert isinstance(text, str), repr(text)
-        return list_to_stack(text.splitlines()), stack
-    D['splitlines'] = splitlines
+
+D = initialize()
+
+@SimpleFunctionWrapper
+def splitlines(stack):
+    text, stack = stack
+    assert isinstance(text, str), repr(text)
+    return list_to_stack(text.splitlines()), stack
+D['splitlines'] = splitlines
 
 try:
     A = A
@@ -113,7 +117,9 @@ def main():
         exec code in name_space.copy()
         return stack
     D['evaluate'] = evaluate
-        
+
+    load_definitions(pt, D)
+
     error_guard(loop.loop)
 
 

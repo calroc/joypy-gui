@@ -219,7 +219,6 @@ class TextViewer(MenuViewer):
             (0, 0, self.w - 1, self.MINIMUM_HEIGHT),
             pygame.BLEND_MULT
             )
-        
 
     def draw_body(self):
         MenuViewer.draw_body(self)

@@ -27,14 +27,13 @@ tracks each of which manages zero or more viewers.
 
 
 Still to do:
-* Return key can orphan a line at the bottom of a viewer.
-* Redirect stdout to "print" to the log.
-* Calculator buttons on the numpad?
-* A way to open a default viewer (in case you close them all.)
-* A way to view docs/definition for a command.
 * Local library auto-loaded at start-time
   * primitives in Python
   * definitions
+* A way to open a default viewer (in case you close them all.)
+* Return key can orphan a line at the bottom of a viewer.
+* Redirect stdout to "print" to the log.
+* Calculator buttons on the numpad?
 * System query for most recent selection
 * Home/End keys
 * Vertical scrolling w/ scrollbar
