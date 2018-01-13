@@ -244,7 +244,7 @@ class TextViewerWidget(tk.Text, MouseBindingsMixin, SavingMixin):
     self.insert_it(s)
 
   def insert_it(self, s):
-    if not isinstance(s, str):
+    if not isinstance(s, basestring):
       s = str(s)
 
     # When pasting from the mouse we have to remove the current selection
