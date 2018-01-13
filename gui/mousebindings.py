@@ -129,7 +129,7 @@ class MouseBindingsMixin:
         self.dothis = self.cancel
 
       else:
-        #left-right-interclick - copy selection to stack
+        #left-right-interclick - run selection
         self.dothis = self.run_selection
 
     elif self.B2_DOWN :
