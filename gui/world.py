@@ -19,8 +19,8 @@
 #
 from inspect import getdoc
 
-from ..joy import run
-from ..utils.stack import strstack
+from joy.joy import run
+from joy.utils.stack import stack_to_string
 
 from .misc import is_numerical
 
@@ -87,5 +87,5 @@ class World(object):
     stack_out_index = self.text_widget.search('<' 'STACK', 1.0)
     if stack_out_index:
       self.text_widget.see(stack_out_index)
-      s = strstack(self.stack) + '\n'
+      s = stack_to_string(self.stack) + '\n'
       self.text_widget.insert(stack_out_index, s)
