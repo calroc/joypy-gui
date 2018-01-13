@@ -20,8 +20,6 @@ L M R - command
 2   1 - Print docs of command word under mouse cursor
   2 1 - Lookup word (kinda useless now)
 
-
-23 18 add
 '''
 import sys
 from joy.utils.stack import stack_to_string
@@ -42,17 +40,24 @@ w = StackDisplayWorld(dictionary=D)
 
 top = tk.Toplevel()
 top.title('Log')
-log = TextViewerWidget(w, top, width=45)
+log = TextViewerWidget(w, top, width=80, height=50)
 log.pack(expand=True, fill=tk.BOTH)
-
 
 t = TextViewerWidget(w)
 t._root().title('Joy')
 t.pack(expand=True, fill=tk.BOTH)
 
+
+def reset_log(*args):
+  log.delete('0.0', tk.END)
+  print __doc__
+  return args
+D['reset_log'] = reset_log
+
+
 sys.stdout, old_stdout = FileFaker(log), sys.stdout
 try:
-  print __doc__
+  reset_log()
   t.mainloop()
 finally:
   sys.stdout = old_stdout
