@@ -26,6 +26,7 @@ class FileFaker(object):
 
   def write(self, text):
     self.T.insert('end', text)
+    self.T.see('end')
 
   def flush(self):
     pass
