@@ -1,0 +1,26 @@
+Joypy - Copyright © 2018 Simon Forman
+This program comes with ABSOLUTELY NO WARRANTY; for details right-click "warranty".
+This is free software, and you are welcome to redistribute it under certain conditions; right-click "sharing" for details.
+Right-click "words" to see a list of all words, and ... to print the docs for a word.
+
+Mouse button chords.
+
+L M R - command
+1     - Point, sweep selection
+1 2   - Cut the selection, place text on stack
+1   2 - Run the selection as Joy code
+
+  1   - Paste selection (bypass stack), scroll
+2 1   - Paste from top of stack, preserve
+  1 2 - Paste from top of stack, pop
+
+    1 - Execute command word under mouse cursor
+2   1 - Print docs of command word under mouse cursor
+  2 1 - Lookup word (kinda useless now)
+
+
+
+
+!= % & * *fraction *fraction0 + ++ - -- / < << <= <> = > >= >> ? ^ abs add anamorphism and app1 app2 app3 at average b binary branch choice clear cleave concat cons dinfrirst dip dipd dipdd disenstacken div divmod down_to_zero drop dudipd dup dupd dupdip enstacken eq first flatten floor floordiv gcd ge genrec getitem gt help i id ifte infra le least_fraction loop lshift lt map max min mod modulus mul ne neg not nullary of or over pam parse pick pm pop popd popdd popop pow pred primrec product quoted range range_to_zero rem remainder remove reset_log rest reverse roll< roll> rolldown rollup rshift run second select sharing shunt size sort sqr sqrt stack step step_zero sub succ sum swaack swap swoncat swons take ternary third times truediv truthy tuck unary uncons unique unit unquoted unstack void warranty while words x xor zip •
+
+
