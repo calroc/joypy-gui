@@ -27,9 +27,9 @@ from .misc import is_numerical
 
 class World(object):
 
-  def __init__(self, stack=(), dictionary=(), text_widget=None):
+  def __init__(self, stack=(), dictionary=None, text_widget=None):
     self.stack = stack
-    self.dictionary = dictionary
+    self.dictionary = dictionary or {}
     self.text_widget = text_widget
 
   def do_lookup(self, name):
@@ -72,13 +72,7 @@ class World(object):
     self.print_stack()
 
   def has(self, name):
-    try:
-      self.dictionary[name]
-    except KeyError:
-      res = False
-    else:
-      res = True
-    return res
+    return self.dictionary.has_key(name)
 
   def save(self):
     pass
