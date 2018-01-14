@@ -21,11 +21,11 @@ L M R - command
   2 1 - Lookup word (kinda useless now)
 
 '''
-import sys
+import os, pickle, sys
 from joy.utils.stack import stack_to_string
 from joy.library import initialize
 from gui.misc import FileFaker
-from gui.textwidget import TextViewerWidget, tk
+from gui.textwidget import TextViewerWidget, tk, get_font
 from gui.world import World
 
 
@@ -33,6 +33,12 @@ class StackDisplayWorld(World):
 
   def print_stack(self):
     print '\n' + stack_to_string(self.stack)
+
+  def save(self):
+    with open('stack.pickle', 'wb') as f:
+      pickle.dump(self.stack, f)
+      f.flush()
+      os.fsync(f.fileno())
 
 
 D = initialize()
@@ -42,11 +48,14 @@ top = tk.Toplevel()
 top.title('Log')
 log = TextViewerWidget(w, top, width=80, height=50)
 log.pack(expand=True, fill=tk.BOTH)
+log.filename = 'log.txt'
 
 t = TextViewerWidget(w)
 t._root().title('Joy')
 t.pack(expand=True, fill=tk.BOTH)
+t.filename = 'scratch.txt'
 
+log['font'] = t['font'] = get_font()
 
 def reset_log(*args):
   log.delete('0.0', tk.END)
