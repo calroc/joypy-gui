@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''\
 Joypy - Copyright © 2018 Simon Forman
@@ -41,21 +42,22 @@ class StackDisplayWorld(World):
       os.fsync(f.fileno())
 
 
+def init_text(t, title, filename):
+  t.winfo_toplevel().title(title)
+  t.pack(expand=True, fill=tk.BOTH)
+  t.filename = filename
+  t['font'] = FONT  # See below.
+
+
 D = initialize()
 w = StackDisplayWorld(dictionary=D)
 
-top = tk.Toplevel()
-top.title('Log')
-log = TextViewerWidget(w, top, width=80, height=50)
-log.pack(expand=True, fill=tk.BOTH)
-log.filename = 'log.txt'
-
 t = TextViewerWidget(w)
-t._root().title('Joy')
-t.pack(expand=True, fill=tk.BOTH)
-t.filename = 'scratch.txt'
+log = TextViewerWidget(w, tk.Toplevel(), width=80, height=50)
+FONT = get_font()  # Requires Tk root already set up.
+init_text(log, 'Log', 'log.txt')
+init_text(t, 'Joy', 'scratch.txt')
 
-log['font'] = t['font'] = get_font()
 
 def reset_log(*args):
   log.delete('0.0', tk.END)
