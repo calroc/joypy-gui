@@ -4,23 +4,22 @@
 Joypy - Copyright © 2018 Simon Forman
 This program comes with ABSOLUTELY NO WARRANTY; for details right-click "warranty".
 This is free software, and you are welcome to redistribute it under certain conditions; right-click "sharing" for details.
-Right-click "words" to see a list of all words, and ... to print the docs for a word.
+Right-click "words" or press F12 to see a list of all words,
+Right-Left-click on a command word to print the docs for it.
 
-Mouse button chords.
+Mouse button chords (to cancel a chord, click the third mouse button.)
 
-L M R - command
-1     - Point, sweep selection
-1 2   - Cut the selection, place text on stack
-1   2 - Run the selection as Joy code
+Left - Point, sweep selection
+Left-Middle - Cut the selection, place text on stack
+Left-Right - Run the selection as Joy code
 
-  1   - Paste selection (bypass stack), scroll
-2 1   - Paste from top of stack, preserve
-  1 2 - Paste from top of stack, pop
+Middle - Paste selection (bypass stack), scroll
+Middle-Left - Paste from top of stack, preserve
+Middle-Right - Paste from top of stack, pop
 
-    1 - Execute command word under mouse cursor
-2   1 - Print docs of command word under mouse cursor
-  2 1 - Lookup word (kinda useless now)
-
+Right - Execute command word under mouse cursor
+Right-Left - Print docs of command word under mouse cursor
+Right-Middle - Lookup word (kinda useless now)
 '''
 import os, pickle, sys, traceback
 from joy.utils.stack import stack_to_string
@@ -89,6 +88,14 @@ log = TextViewerWidget(w, log_window, width=80, height=50)
 FONT = get_font()  # Requires Tk root already set up.
 init_text(log, 'Log', LOG_FN)
 init_text(t, 'Joy', JOY_FN)
+
+
+GLOBAL_COMMANDS = {
+  '<F12>': 'words',
+  '<Escape>': 'clear reset_log show_log',
+  }
+for event, command in GLOBAL_COMMANDS.items():
+  t.bind_all(event, lambda _, _command=command: w.interpret(_command))
 
 
 sys.stdout, old_stdout = FileFaker(log), sys.stdout
