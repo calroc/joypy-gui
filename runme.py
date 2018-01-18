@@ -64,8 +64,15 @@ def reset_log(*args):
   return args
 
 
+def show_log(*args):
+  log_window.wm_deiconify()
+  log_window.update()
+  return args
+
+
 D = initialize()
 D['reset_log'] = reset_log
+D['show_log'] = show_log
 if os.path.exists(STACK_FN):
   with open(STACK_FN) as f:
     try:
@@ -76,10 +83,14 @@ if os.path.exists(STACK_FN):
     else:
       w = StackDisplayWorld(stack=stack, dictionary=D)
 t = TextViewerWidget(w)
-log = TextViewerWidget(w, tk.Toplevel(), width=80, height=50)
+log_window = tk.Toplevel()
+log_window.protocol("WM_DELETE_WINDOW", log_window.withdraw)
+log = TextViewerWidget(w, log_window, width=80, height=50)
 FONT = get_font()  # Requires Tk root already set up.
 init_text(log, 'Log', LOG_FN)
 init_text(t, 'Joy', JOY_FN)
+
+
 sys.stdout, old_stdout = FileFaker(log), sys.stdout
 try:
   t.mainloop()
