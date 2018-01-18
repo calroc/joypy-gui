@@ -19,3 +19,5 @@ L M R - command
   2 1 - Lookup word (kinda useless now)
 
 
+
+ <-

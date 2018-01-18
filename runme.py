@@ -22,7 +22,7 @@ L M R - command
   2 1 - Lookup word (kinda useless now)
 
 '''
-import os, pickle, sys
+import os, pickle, sys, traceback
 from joy.utils.stack import stack_to_string
 from joy.library import initialize
 from gui.misc import FileFaker
@@ -30,13 +30,19 @@ from gui.textwidget import TextViewerWidget, tk, get_font
 from gui.world import World
 
 
+JOY_HOME = os.environ.get('JOY_HOME', '.')
+STACK_FN = os.path.join(JOY_HOME, 'stack.pickle')
+JOY_FN = os.path.join(JOY_HOME, 'scratch.txt')
+LOG_FN = os.path.join(JOY_HOME, 'log.txt')
+
+
 class StackDisplayWorld(World):
 
   def print_stack(self):
-    print '\n' + stack_to_string(self.stack)
+    print '\n%s <-' % stack_to_string(self.stack)
 
   def save(self):
-    with open('stack.pickle', 'wb') as f:
+    with open(STACK_FN, 'wb') as f:
       pickle.dump(self.stack, f)
       f.flush()
       os.fsync(f.fileno())
@@ -45,30 +51,37 @@ class StackDisplayWorld(World):
 def init_text(t, title, filename):
   t.winfo_toplevel().title(title)
   t.pack(expand=True, fill=tk.BOTH)
+  if os.path.exists(filename):
+    with open(filename) as f:
+      t.insert(tk.END, f.read())
   t.filename = filename
   t['font'] = FONT  # See below.
-
-
-D = initialize()
-w = StackDisplayWorld(dictionary=D)
-
-t = TextViewerWidget(w)
-log = TextViewerWidget(w, tk.Toplevel(), width=80, height=50)
-FONT = get_font()  # Requires Tk root already set up.
-init_text(log, 'Log', 'log.txt')
-init_text(t, 'Joy', 'scratch.txt')
 
 
 def reset_log(*args):
   log.delete('0.0', tk.END)
   print __doc__
   return args
+
+
+D = initialize()
 D['reset_log'] = reset_log
-
-
+if os.path.exists(STACK_FN):
+  with open(STACK_FN) as f:
+    try:
+      stack = pickle.load(f)
+    except:
+      traceback.print_exc()
+      w = StackDisplayWorld(dictionary=D)
+    else:
+      w = StackDisplayWorld(stack=stack, dictionary=D)
+t = TextViewerWidget(w)
+log = TextViewerWidget(w, tk.Toplevel(), width=80, height=50)
+FONT = get_font()  # Requires Tk root already set up.
+init_text(log, 'Log', LOG_FN)
+init_text(t, 'Joy', JOY_FN)
 sys.stdout, old_stdout = FileFaker(log), sys.stdout
 try:
-  reset_log()
   t.mainloop()
 finally:
   sys.stdout = old_stdout
