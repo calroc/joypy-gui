@@ -19,4 +19,4 @@ Right-Left - Print docs of command word under mouse cursor
 Right-Middle - Lookup word (kinda useless now)
 
 
- <-
+1732.0629318820954 1732.0629318820954 <-

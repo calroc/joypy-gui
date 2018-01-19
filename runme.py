@@ -92,6 +92,7 @@ init_text(t, 'Joy', JOY_FN)
 
 GLOBAL_COMMANDS = {
   '<F12>': 'words',
+  '<F1>': 'reset_log show_log',
   '<Escape>': 'clear reset_log show_log',
   }
 for event, command in GLOBAL_COMMANDS.items():
