@@ -7,7 +7,6 @@ stack dup cons clear reset_log show_log
 [9 8 6 7 5 0 3 5 2 3] 5 [take reverse] [drop] cleave popdd
 
 
-split_at == [take reverse] [drop] cleave popdd
 
 [split_at] [[take reverse] [drop] cleave popdd] inscribe
 
@@ -18,4 +17,5 @@ split_at == [take reverse] [drop] cleave popdd
 pop
 00000000
 
-
+split_at == [take reverse] [drop] cleave popdd
+reverse_stack == enstacken reverse unstack
