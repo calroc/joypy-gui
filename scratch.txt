@@ -1,6 +1,6 @@
 != % & * *fraction *fraction0 + ++ - -- / < << <= <> = > >= >> ? ^ abs add anamorphism and app1 app2 app3 at average b binary branch choice clear cleave concat cons dinfrirst dip dipd dipdd disenstacken div divmod down_to_zero drop dudipd dup dupd dupdip enstacken eq first flatten floor floordiv gcd ge genrec getitem gt help i id ifte infra le least_fraction loop lshift lt map max min mod modulus mul ne neg not nullary of or over pam parse pick pm pop popd popdd popop pow pred primrec product quoted range range_to_zero rem remainder remove reset_log rest reverse roll< roll> rolldown rollup rshift run second select sharing shunt size sort sqr sqrt step step_zero sub succ sum swaack swap swoncat swons take ternary third times truediv truthy tuck unary uncons unique unit unquoted unstack void warranty while words x xor zip •
 
-stack dup cons clear reset_log show_log
+stack dup cons clear reset_log show_log grand_reset
 
 [9 8 6 7 5 0 3 5 2 3] 5 [drop] [take] cleave
 
@@ -19,3 +19,6 @@ pop
 
 split_at == [take reverse] [drop] cleave popdd
 reverse_stack == enstacken reverse unstack
+
+
+2 64 pow --

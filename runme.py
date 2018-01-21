@@ -69,18 +69,39 @@ def show_log(*args):
   return args
 
 
+def grand_reset(s, e, d):
+  stack = load_stack() or ()
+  reset_text(log, LOG_FN)
+  reset_text(t, JOY_FN)
+  return stack, e, d
+
+
+def reset_text(t, filename):
+  if os.path.exists(filename):
+    with open(filename) as f:
+      data = f.read()
+    if  data:
+      t.delete('0.0', tk.END)
+      t.insert(tk.END, data)
+
+
+def load_stack():
+  if os.path.exists(STACK_FN):
+    with open(STACK_FN) as f:
+      try:
+        return pickle.load(f)
+      except:
+        traceback.print_exc()
+
+
 D = initialize()
-D['reset_log'] = reset_log
-D['show_log'] = show_log
-if os.path.exists(STACK_FN):
-  with open(STACK_FN) as f:
-    try:
-      stack = pickle.load(f)
-    except:
-      traceback.print_exc()
-      w = StackDisplayWorld(dictionary=D)
-    else:
-      w = StackDisplayWorld(stack=stack, dictionary=D)
+for func in (reset_log, show_log, grand_reset):
+  D[func.__name__] = func
+stack = load_stack()
+if stack is None:
+  w = StackDisplayWorld(dictionary=D)
+else:
+  w = StackDisplayWorld(stack=stack, dictionary=D)
 t = TextViewerWidget(w)
 log_window = tk.Toplevel()
 log_window.protocol("WM_DELETE_WINDOW", log_window.withdraw)
