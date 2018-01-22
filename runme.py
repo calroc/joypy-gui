@@ -106,7 +106,7 @@ t = TextViewerWidget(w)
 log_window = tk.Toplevel()
 log_window.protocol("WM_DELETE_WINDOW", log_window.withdraw)
 log = TextViewerWidget(w, log_window, width=80, height=50)
-FONT = get_font()  # Requires Tk root already set up.
+FONT = get_font('Iosevka')  # Requires Tk root already set up.
 init_text(log, 'Log', LOG_FN)
 init_text(t, 'Joy', JOY_FN)
 
