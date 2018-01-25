@@ -29,7 +29,15 @@ from gui.textwidget import TextViewerWidget, tk, get_font
 from gui.world import World
 
 
-JOY_HOME = os.environ.get('JOY_HOME', '.')
+JOY_HOME = os.environ.get('JOY_HOME')
+if JOY_HOME is None:
+  JOY_HOME = os.path.expanduser('~/.joypy')
+  if not os.path.isabs(JOY_HOME):
+    JOY_HOME = os.path.abspath('./JOY_HOME')
+  print 'JOY_HOME=' + JOY_HOME
+  if not os.path.exists(JOY_HOME):
+    print 'creating...'
+    os.makedirs(JOY_HOME, 0700)
 STACK_FN = os.path.join(JOY_HOME, 'stack.pickle')
 JOY_FN = os.path.join(JOY_HOME, 'scratch.txt')
 LOG_FN = os.path.join(JOY_HOME, 'log.txt')
@@ -42,6 +50,7 @@ class StackDisplayWorld(World):
 
   def save(self):
     with open(STACK_FN, 'wb') as f:
+      os.chmod(STACK_FN, 0600)
       pickle.dump(self.stack, f)
       f.flush()
       os.fsync(f.fileno())
