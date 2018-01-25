@@ -1,60 +1,40 @@
 Joypy - Copyright © 2018 Simon Forman
-This program comes with ABSOLUTELY NO WARRANTY; for details right-click "warranty".
-This is free software, and you are welcome to redistribute it under certain conditions; right-click "sharing" for details.
-Right-click "words" or press F12 to see a list of all words,
-Right-Left-click on a command word to print the docs for it.
+This program comes with ABSOLUTELY NO WARRANTY; for details right-click "warranty". This is free software, and you are welcome to redistribute it under certain conditions; right-click "sharing" for details. Right-click on these commands to see docs on UI commands: key_bindings mouse_bindings
 
-Mouse button chords (to cancel a chord, click the third mouse button.)
+[23 3 2 1 17 17 1 2 3 23] [[23 3 2 1 17 17 1 2 3 23]] <-
 
-Left - Point, sweep selection
-Left-Middle - Cut the selection, place text on stack
-Left-Right - Run the selection as Joy code
+[23 3 2 1 17 17 1 2 3 23] <-
 
-Middle - Paste selection (bypass stack), scroll
-Middle-Left - Paste from top of stack, preserve
-Middle-Right - Paste from top of stack, pop
+23 3 2 1 17 17 1 2 3 23 <-
 
-Right - Execute command word under mouse cursor
-Right-Left - Print docs of command word under mouse cursor
-Right-Middle - Lookup word (kinda useless now)
+23 3 2 1 17 <-
 
+[17 1 2 3 23] <-
+
+17 1 2 3 23 <-
+
+[23 3 2 1 17] <-
+
+17 1 2 3 23 <-
+
+17 1 2 3 23 [23 3 2 1 17] <-
+
+17 1 2 3 23 <-
+
+[23 3 2 1 17] <-
+
+23 3 2 1 17 <-
+
+23 3 2 1 17 [17 1 2 3 23] <-
+
+23 3 2 1 17 <-
+
+23 3 2 1 17 [17 1 2 3 23] <-
+
+23 3 2 1 17 [17 1 2 3 23] [17 1 2 3 23] <-
+
+23 3 2 1 17 [23 3 2 1 17 17 1 2 3 23] <-
+
+23 3 2 1 17 <-
 
  <-
-
-18446744073709551615 <-
-
-4294967296.0 <-
-
-65536.0 <-
-
-256.0 <-
-
-16.0 <-
-
-4.0 <-
-
-2.0 <-
-
-1.4142135623730951 <-
-
-1.4142135623730951 10000000000000000 <-
-
-1.4142135623730952e+16 <-
-
-14142135623730952 <-
-
-14142135623730952 10000000000000000 <-
-
-10000000000000000 14142135623730952 <-
-
-0.7071067811865475 <-
-
-0.7071067811865475 10000000000000000 <-
-
-0.7071067811865475 10000000000000000 14142135623730952 <-
-
-0.7071067811865475 14142135623730952 10000000000000000 <-
-
-0.7071067811865475 1.4142135623730951 <-
-
-1.0 <-

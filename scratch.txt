@@ -2,25 +2,14 @@
 
 stack dup cons clear reset_log show_log grand_reset
 
-[9 8 6 7 5 0 3 5 2 3] 5 [drop] [take] cleave
-
-[9 8 6 7 5 0 3 5 2 3] 5 [take reverse] [drop] cleave popdd
-
-
-
-[split_at] [[take reverse] [drop] cleave popdd] inscribe
-
-9 8 7
-
-5550000 reverse reverse
-
 pop
-00000000
 
-split_at == [take reverse] [drop] cleave popdd
-reverse_stack == enstacken reverse unstack
+[1 2 3] [i] 23 17
+
+5 [pop] times
 
 
-2 64 pow --
+try == [stack] dip infra
 
-10000000000000000
+
+
