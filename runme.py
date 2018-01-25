@@ -1,31 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''\
+('''\
 Joypy - Copyright © 2018 Simon Forman
-This program comes with ABSOLUTELY NO WARRANTY; for details right-click "warranty".
-This is free software, and you are welcome to redistribute it under certain conditions; right-click "sharing" for details.
-Right-click "words" or press F12 to see a list of all words,
-Right-Left-click on a command word to print the docs for it.
-
-Mouse button chords (to cancel a chord, click the third mouse button.)
-
-Left - Point, sweep selection
-Left-Middle - Cut the selection, place text on stack
-Left-Right - Run the selection as Joy code
-
-Middle - Paste selection (bypass stack), scroll
-Middle-Left - Paste from top of stack, preserve
-Middle-Right - Paste from top of stack, pop
-
-Right - Execute command word under mouse cursor
-Right-Left - Print docs of command word under mouse cursor
-Right-Middle - Lookup word (kinda useless now)
 '''
+'This program comes with ABSOLUTELY NO WARRANTY; for details right-click "warranty".'
+' This is free software, and you are welcome to redistribute it under certain conditions;'
+' right-click "sharing" for details.'
+' Right-click on these commands to see docs on UI commands: key_bindings mouse_bindings')
 import os, pickle, sys, traceback
+from textwrap import dedent
 from joy.utils.stack import stack_to_string
 from joy.library import initialize
 from gui.misc import FileFaker
-from gui.textwidget import TextViewerWidget, tk, get_font
+from gui.textwidget import TextViewerWidget, tk, get_font, TEXT_BINDINGS
 from gui.world import World
 
 
@@ -66,6 +53,39 @@ def init_text(t, title, filename):
   t['font'] = FONT  # See below.
 
 
+def key_bindings(*args):
+  print dedent('''
+    Ctrl-Enter - Run the selection as Joy code.
+    F1 - Reset and show (if hidden) the log.
+    Esc - Like F1 but also clears the stack.
+    F5 - Copy the selection to text on the stack.
+    Shift-F5 - As F5 but cuts the selection.
+    F6 - Paste as text from top of stack.
+    Shift-F6 - As F6 but pops the item.
+    F12 - print a list of all command words, or right-click "words".
+    ''')
+  return args
+
+
+def mouse_bindings(*args):
+  print dedent('''
+    Mouse button chords (to cancel a chord, click the third mouse button.)
+
+    Left - Point, sweep selection
+    Left-Middle - Copy the selection, place text on stack
+    Left-Right - Run the selection as Joy code
+
+    Middle - Paste selection (bypass stack); click and drag to scroll.
+    Middle-Left - Paste from top of stack, preserve
+    Middle-Right - Paste from top of stack, pop
+
+    Right - Execute command word under mouse cursor
+    Right-Left - Print docs of command word under mouse cursor
+    Right-Middle - Lookup word (kinda useless now)
+    ''')
+  return args
+
+
 def reset_log(*args):
   log.delete('0.0', tk.END)
   print __doc__
@@ -103,18 +123,29 @@ def load_stack():
         traceback.print_exc()
 
 
+tb = TEXT_BINDINGS.copy()
+tb.update({
+  '<Shift-F5>': lambda tv: tv.cut,
+  '<F5>': lambda tv: tv.copy_selection_to_stack,
+  '<Shift-F6>': lambda tv: tv.pastecut,
+  '<F6>': lambda tv: tv.copyto,
+  })
+defaults = dict(text_bindings=tb, width=80, height=50)
+
+
 D = initialize()
-for func in (reset_log, show_log, grand_reset):
+for func in (reset_log, show_log, grand_reset,
+             key_bindings, mouse_bindings):
   D[func.__name__] = func
 stack = load_stack()
 if stack is None:
   w = StackDisplayWorld(dictionary=D)
 else:
   w = StackDisplayWorld(stack=stack, dictionary=D)
-t = TextViewerWidget(w)
+t = TextViewerWidget(w, **defaults)
 log_window = tk.Toplevel()
 log_window.protocol("WM_DELETE_WINDOW", log_window.withdraw)
-log = TextViewerWidget(w, log_window, width=80, height=50)
+log = TextViewerWidget(w, log_window, **defaults)
 FONT = get_font('Iosevka')  # Requires Tk root already set up.
 init_text(log, 'Log', LOG_FN)
 init_text(t, 'Joy', JOY_FN)

@@ -46,6 +46,8 @@ from re import compile as regular_expression
 from traceback import format_exc
 import sys
 
+from joy.utils.stack import stack_to_string
+
 from .misc import FileFaker, is_numerical
 from .mousebindings import MouseBindingsMixin
 from .saver import SavingMixin
@@ -76,7 +78,7 @@ def main(dictionary):
 #: keys are string Tk "event sequences" and the values are callables that
 #: get passed the TextViewer instance (so you can bind to methods) and
 #: must return the actual callable to which to bind the event sequence.
-text_bindings = {
+TEXT_BINDINGS = {
 
   #I want to ensure that these keyboard shortcuts work.
   '<Control-v>': lambda tv: tv._paste,
@@ -115,6 +117,8 @@ class TextViewerWidget(tk.Text, MouseBindingsMixin, SavingMixin):
 #        kw.setdefault('bg', 'white')
     kw.setdefault('wrap', 'word')
     kw.setdefault('font', 'arial 12')
+
+    text_bindings = kw.pop('text_bindings', TEXT_BINDINGS)
 
     #Create ourselves as a Tkinter Text
     tk.Text.__init__(self, master, **kw)
@@ -226,26 +230,28 @@ class TextViewerWidget(tk.Text, MouseBindingsMixin, SavingMixin):
     self.focus()
     self.mark_set(tk.INSERT, '@%d,%d' % (event.x, event.y))
 
-  def cut(self, event):
-    '''Cut selection to stack.'''
+  def copy_selection_to_stack(self, event):
+    '''Copy selection to stack.'''
     select_indices = self.tag_ranges(tk.SEL)
     if select_indices:
       s = self.get(select_indices[0], select_indices[1])
       self.world.push(s)
-      # Let the pre-existing machinery take care of cutting the selection.
-      self.event_generate("<<Cut>>")
+
+  def cut(self, event):
+    '''Cut selection to stack.'''
+    self.copy_selection_to_stack(event)
+    # Let the pre-existing machinery take care of cutting the selection.
+    self.event_generate("<<Cut>>")
 
   def copyto(self, event):
     '''Actually "paste" from TOS'''
-    try:
-      s = self.world.peek()
-    except IndexError:
-      return
-    self.insert_it(s)
+    s = self.world.peek()
+    if s is not None:
+      self.insert_it(s)
 
   def insert_it(self, s):
     if not isinstance(s, basestring):
-      s = str(s)
+      s = stack_to_string(s)
 
     # When pasting from the mouse we have to remove the current selection
     # to prevent destroying it by the paste operation.
