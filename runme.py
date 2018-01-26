@@ -59,6 +59,10 @@ class StackDisplayWorld(World):
 
   relative_STACK_FN = repo_relative_path(STACK_FN)
 
+  def interpret(self, command):
+    print '\njoy?', command
+    super(StackDisplayWorld, self).interpret(command)
+
   def print_stack(self):
     print '\n%s <-' % stack_to_string(self.stack)
 
