@@ -105,7 +105,7 @@ class TextViewerWidget(tk.Text, MouseBindingsMixin, SavingMixin):
     foreground = "orange"
   )
 
-  def __init__(self, world, master=None,  **kw):
+  def __init__(self, world, master=None, **kw):
 
     self.world = world
     if self.world.text_widget is None:

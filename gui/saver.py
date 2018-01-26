@@ -59,6 +59,8 @@ class SavingMixin:
       f.write(text.encode('UTF_8'))
       f.flush()
       os.fsync(f.fileno())
+    if hasattr(self, 'repo'):
+      self.repo.stage([self.repo_relative_filename])
     self.world.save()
 
   def _cancelSave(self):

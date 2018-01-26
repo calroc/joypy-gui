@@ -9,6 +9,10 @@ Joypy - Copyright © 2018 Simon Forman
 ' Right-click on these commands to see docs on UI commands: key_bindings mouse_bindings')
 import os, pickle, sys, traceback
 from textwrap import dedent
+
+from dulwich.errors import NotGitRepository
+from dulwich.repo import Repo
+
 from joy.utils.stack import stack_to_string
 from joy.library import initialize
 from gui.misc import FileFaker
@@ -22,15 +26,38 @@ if JOY_HOME is None:
   if not os.path.isabs(JOY_HOME):
     JOY_HOME = os.path.abspath('./JOY_HOME')
   print 'JOY_HOME=' + JOY_HOME
-  if not os.path.exists(JOY_HOME):
-    print 'creating...'
-    os.makedirs(JOY_HOME, 0700)
+
+if not os.path.exists(JOY_HOME):
+  print 'creating...'
+  os.makedirs(JOY_HOME, 0700)
+  print 'initializing git repository...'
+  repo = Repo.init(JOY_HOME)
+
+else:  # path does exist
+  try:
+    repo = Repo(JOY_HOME)
+  except NotGitRepository:
+    print 'initializing git repository...'
+    repo = Repo.init(JOY_HOME)
+  else:
+    print 'opened git repository.'
+
+
+def repo_relative_path(path):
+  return os.path.relpath(
+    path,
+    os.path.commonprefix((repo.controldir(), path))
+    )
+
+
 STACK_FN = os.path.join(JOY_HOME, 'stack.pickle')
 JOY_FN = os.path.join(JOY_HOME, 'scratch.txt')
 LOG_FN = os.path.join(JOY_HOME, 'log.txt')
 
 
 class StackDisplayWorld(World):
+
+  relative_STACK_FN = repo_relative_path(STACK_FN)
 
   def print_stack(self):
     print '\n%s <-' % stack_to_string(self.stack)
@@ -41,6 +68,12 @@ class StackDisplayWorld(World):
       pickle.dump(self.stack, f)
       f.flush()
       os.fsync(f.fileno())
+    repo.stage([self.relative_STACK_FN])
+    commit_id = repo.do_commit(
+      'message',
+      committer='Simon Forman <forman.simon@gmail.com>',
+      )
+    print >> sys.stderr, commit_id
 
 
 def init_text(t, title, filename):
@@ -49,7 +82,12 @@ def init_text(t, title, filename):
   if os.path.exists(filename):
     with open(filename) as f:
       t.insert(tk.END, f.read())
+      # Prevent this from triggering a git commit.
+      t.update()
+      t._cancelSave()
   t.filename = filename
+  t.repo_relative_filename = repo_relative_path(filename)
+  t.repo = repo
   t['font'] = FONT  # See below.
 
 
@@ -109,7 +147,7 @@ def reset_text(t, filename):
   if os.path.exists(filename):
     with open(filename) as f:
       data = f.read()
-    if  data:
+    if data:
       t.delete('0.0', tk.END)
       t.insert(tk.END, data)
 
