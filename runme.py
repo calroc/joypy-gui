@@ -214,8 +214,14 @@ class FileFaker(object):
     pass
 
 
-sys.stdout, old_stdout = FileFaker(log), sys.stdout
-try:
-  t.mainloop()
-finally:
-  sys.stdout = old_stdout
+def main():
+  sys.stdout, old_stdout = FileFaker(log), sys.stdout
+  try:
+    t.mainloop()
+  finally:
+    sys.stdout = old_stdout
+  return 0
+
+
+if __name__ == '__main__':
+  main()
