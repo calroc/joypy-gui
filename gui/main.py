@@ -7,7 +7,7 @@ Joypy - Copyright © 2018 Simon Forman
 ' This is free software, and you are welcome to redistribute it under certain conditions;'
 ' right-click "sharing" for details.'
 ' Right-click on these commands to see docs on UI commands: key_bindings mouse_bindings')
-import os, pickle, sys, traceback
+import os, pickle, sys
 from textwrap import dedent
 
 from dulwich.errors import NotGitRepository
@@ -24,22 +24,22 @@ if JOY_HOME is None:
   JOY_HOME = os.path.expanduser('~/.joypy')
   if not os.path.isabs(JOY_HOME):
     JOY_HOME = os.path.abspath('./JOY_HOME')
-  print 'JOY_HOME=' + JOY_HOME
+  #print 'JOY_HOME=' + JOY_HOME
 
 if not os.path.exists(JOY_HOME):
-  print 'creating...'
+  #print 'creating...'
   os.makedirs(JOY_HOME, 0700)
-  print 'initializing git repository...'
+  #print 'initializing git repository...'
   repo = Repo.init(JOY_HOME)
 
 else:  # path does exist
   try:
     repo = Repo(JOY_HOME)
   except NotGitRepository:
-    print 'initializing git repository...'
+    #print 'initializing git repository...'
     repo = Repo.init(JOY_HOME)
-  else:
-    print 'opened git repository.'
+  #else:
+    #print 'opened git repository.'
 
 
 def repo_relative_path(path):
@@ -76,7 +76,7 @@ class StackDisplayWorld(World):
       'message',
       committer='Simon Forman <forman.simon@gmail.com>',
       )
-    print >> sys.stderr, commit_id
+    #print >> sys.stderr, commit_id
 
 
 def init_text(t, title, filename):
@@ -158,10 +158,7 @@ def reset_text(t, filename):
 def load_stack():
   if os.path.exists(STACK_FN):
     with open(STACK_FN) as f:
-      try:
-        return pickle.load(f)
-      except:
-        traceback.print_exc()
+      return pickle.load(f)
 
 
 tb = TEXT_BINDINGS.copy()
@@ -189,7 +186,7 @@ log_window.protocol("WM_DELETE_WINDOW", log_window.withdraw)
 log = TextViewerWidget(w, log_window, **defaults)
 FONT = get_font('Iosevka')  # Requires Tk root already set up.
 init_text(log, 'Log', LOG_FN)
-init_text(t, 'Joy', JOY_FN)
+init_text(t, 'Joy - ' + JOY_HOME, JOY_FN)
 
 
 GLOBAL_COMMANDS = {
