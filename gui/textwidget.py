@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2014, 2015 Simon Forman
+#    Copyright © 2014, 2015, 2018 Simon Forman
 #
 #    This file is part of joy.py
 #
@@ -44,13 +44,12 @@ except ImportError:
 
 from re import compile as regular_expression
 from traceback import format_exc
-import sys
+import os, sys
 
 from joy.utils.stack import stack_to_string
 
 from .misc import FileFaker, is_numerical
 from .mousebindings import MouseBindingsMixin
-from .saver import SavingMixin
 from .world import World
 
 
@@ -86,6 +85,79 @@ TEXT_BINDINGS = {
   '<Shift-Insert>': lambda tv: tv._paste,
   '<Control-Return>': lambda tv: tv._control_enter,
   }
+
+
+class SavingMixin:
+
+  def __init__(self, saver=None, filename=None, save_delay=2000):
+    self.saver = self._saver if saver is None else saver
+    self.filename = filename
+    self._save_delay = save_delay
+    self.tk.call(self._w, 'edit', 'modified', 0)
+    self.bind('<<Modified>>', self._beenModified)
+    self._resetting_modified_flag = False
+    self._save = None
+
+  def save(self):
+    '''
+    Call _saveFunc() after a certain amount of idle time.
+
+    Called by _beenModified().
+    '''
+    self._cancelSave()
+    if self.saver:
+      self._saveAfter(self._save_delay)
+
+  def _saveAfter(self, delay):
+    '''
+    Trigger a cancel-able call to _saveFunc() after delay milliseconds.
+    '''
+    self._save = self.after(delay, self._saveFunc)
+
+  def _saveFunc(self):
+    self._save = None
+    self.saver(self._get_contents())
+
+  def _saver(self, text):
+    if not self.filename:
+      return
+    with open(self.filename, 'w') as f:
+      os.chmod(self.filename, 0600)
+      f.write(text.encode('UTF_8'))
+      f.flush()
+      os.fsync(f.fileno())
+    if hasattr(self, 'repo'):
+      self.repo.stage([self.repo_relative_filename])
+    self.world.save()
+
+  def _cancelSave(self):
+    if self._save is not None:
+      self.after_cancel(self._save)
+      self._save = None
+
+  def _get_contents(self):
+    self['state'] = 'disabled'
+    try:
+      return self.get('0.0', 'end')[:-1]
+    finally:
+      self['state'] = 'normal'
+
+  def _beenModified(self, event):
+    if self._resetting_modified_flag:
+      return
+    self._clearModifiedFlag()
+    self.save()
+
+  def _clearModifiedFlag(self):
+    self._resetting_modified_flag = True
+    try:
+      self.tk.call(self._w, 'edit', 'modified', 0)
+    finally:
+      self._resetting_modified_flag = False
+
+##        tags = self._saveTags()
+##        chunks = self.DUMP()
+##        print chunks
 
 
 class TextViewerWidget(tk.Text, MouseBindingsMixin, SavingMixin):
