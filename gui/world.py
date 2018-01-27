@@ -22,7 +22,13 @@ from inspect import getdoc
 from joy.joy import run
 from joy.utils.stack import stack_to_string
 
-from .misc import is_numerical
+
+def is_numerical(s):
+  try:
+    float(s)
+  except ValueError:
+    return False
+  return True
 
 
 class World(object):
@@ -39,14 +45,14 @@ class World(object):
 
   def do_opendoc(self, name):
     if is_numerical(name):
-      print('The number', name)
+      print 'The number', name
     else:
       try:
         word = self.dictionary[name]
       except KeyError:
-        print(repr(name), '???')
+        print repr(name), '???'
       else:
-        print(getdoc(word))
+        print getdoc(word)
     self.text_widget.see('end')
 
   def pop(self):

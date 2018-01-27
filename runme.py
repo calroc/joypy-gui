@@ -15,7 +15,6 @@ from dulwich.repo import Repo
 
 from joy.utils.stack import stack_to_string
 from joy.library import initialize
-from gui.misc import FileFaker
 from gui.textwidget import TextViewerWidget, tk, get_font, TEXT_BINDINGS
 from gui.world import World
 
@@ -200,6 +199,19 @@ GLOBAL_COMMANDS = {
   }
 for event, command in GLOBAL_COMMANDS.items():
   t.bind_all(event, lambda _, _command=command: w.interpret(_command))
+
+
+class FileFaker(object):
+
+  def __init__(self, T):
+    self.T = T
+
+  def write(self, text):
+    self.T.insert('end', text)
+    self.T.see('end')
+
+  def flush(self):
+    pass
 
 
 sys.stdout, old_stdout = FileFaker(log), sys.stdout

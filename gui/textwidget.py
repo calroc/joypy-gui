@@ -48,9 +48,8 @@ import os, sys
 
 from joy.utils.stack import stack_to_string
 
-from .misc import FileFaker, is_numerical
 from .mousebindings import MouseBindingsMixin
-from .world import World
+from .world import World, is_numerical
 
 
 def make_gui(dictionary):
@@ -65,12 +64,6 @@ def get_font(family='EB Garamond', size=14):
   if family not in families():
     family = 'Times'
   return Font(family=family, size=size)
-
-
-def main(dictionary):
-  t = make_gui(dictionary)
-  sys.stdout = FileFaker(t)
-  return t
 
 
 #: Define mapping between Tkinter events and functions or methods. The
