@@ -81,13 +81,14 @@ class StackDisplayWorld(World):
 
 def init_text(t, title, filename):
   t.winfo_toplevel().title(title)
-  t.pack(expand=True, fill=tk.BOTH)
   if os.path.exists(filename):
     with open(filename) as f:
-      t.insert(tk.END, f.read())
-      # Prevent this from triggering a git commit.
-      t.update()
-      t._cancelSave()
+      data = f.read()
+    t.insert(tk.END, data)
+    # Prevent this from triggering a git commit.
+    t.update()
+    t._cancelSave()
+  t.pack(expand=True, fill=tk.BOTH)
   t.filename = filename
   t.repo_relative_filename = repo_relative_path(filename)
   t.repo = repo
@@ -168,23 +169,42 @@ tb.update({
   '<Shift-F6>': lambda tv: tv.pastecut,
   '<F6>': lambda tv: tv.copyto,
   })
+
+
 defaults = dict(text_bindings=tb, width=80, height=50)
 
 
 D = initialize()
-for func in (reset_log, show_log, grand_reset,
-             key_bindings, mouse_bindings):
+for func in (
+  reset_log,
+  show_log,
+  grand_reset,
+  key_bindings,
+  mouse_bindings,
+  ):
   D[func.__name__] = func
+
+
 stack = load_stack()
+
+
 if stack is None:
   w = StackDisplayWorld(dictionary=D)
 else:
   w = StackDisplayWorld(stack=stack, dictionary=D)
+
+
 t = TextViewerWidget(w, **defaults)
+
+
 log_window = tk.Toplevel()
 log_window.protocol("WM_DELETE_WINDOW", log_window.withdraw)
 log = TextViewerWidget(w, log_window, **defaults)
+
+
 FONT = get_font('Iosevka')  # Requires Tk root already set up.
+
+
 init_text(log, 'Log', LOG_FN)
 init_text(t, 'Joy - ' + JOY_HOME, JOY_FN)
 
