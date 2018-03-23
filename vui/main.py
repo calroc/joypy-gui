@@ -77,8 +77,20 @@ def error_guard(loop, n=10):
             loop()
             break
         except:
-            traceback.print_exc()
+            traceback.print_exc(file=sys.stderr)
             error_count += 1
+
+
+class FileFaker(object):
+
+  def __init__(self, log):
+    self.log = log
+
+  def write(self, text):
+    self.log.append(text)
+
+  def flush(self):
+    pass
 
 
 def main(screen, clock, pt):
@@ -93,7 +105,12 @@ def main(screen, clock, pt):
 
     name_space['D']['evaluate'] = evaluate
 
-    error_guard(name_space['loop'].loop)
+
+    sys.stdout, old_stdout = FileFaker(name_space['log']), sys.stdout
+    try:
+        error_guard(name_space['loop'].loop)
+    finally:
+        sys.stdout = old_stdout
 
     return name_space['d']
 

@@ -126,7 +126,7 @@ def open_viewer(stack):
 @SimpleFunctionWrapper
 def good_viewer_location(stack):
     '''
-    Leave a coordinate pair [x y] (in pixels) on thst stack that would
+    Leave a coordinate pair [x y] (in pixels) on the stack that would
     be a good location at which to open a new viewer.  (The heuristic
     employed is to take up the bottom half of the currently open viewer
     with the greatest area.)

@@ -117,7 +117,6 @@ commands...
 
 Still to do:
 * Return key can orphan a line at the bottom of a viewer.
-* Redirect stdout to "print" to the log.
 * Calculator buttons on the numpad?
 * System query for most recent selection
 * Home/End keys
@@ -131,6 +130,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- Redirect stdout to "print" to the log.
 - Initial contents for JOY_HOME.
 - Pause/Break to open a trap viewer (in case you close them all.)
 - "shutdown" signal to tell PT to commit outstanding changes.

@@ -667,11 +667,8 @@ class TextViewer(MenuViewer):
             self.cursor.draw()
             return True
 
-
-
-
-
-
-
-
-
+    def append(self, content):
+        self.cursor.fade()
+        self.cursor.y = len(self.lines) - 1
+        self.cursor.x = len(self.lines[self.cursor.y])
+        self.insert(content)
