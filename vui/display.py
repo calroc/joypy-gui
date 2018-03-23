@@ -298,7 +298,8 @@ class Display(object):
                 V.mouse_motion(self, x, y, *(event.rel + event.buttons))
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            self.focus(V)
+            if event.button == 1:
+                self.focus(V)
             V.mouse_down(self, x, y, event.button)
 
         else:
