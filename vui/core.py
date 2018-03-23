@@ -5,7 +5,7 @@ from joy.joy import run
 from joy.utils.stack import stack_to_string
 
 
-COMMITTER = 'Simon Forman <forman.simon@gmail.com>'
+COMMITTER = 'Joy <auto-commit@example.com>'
 
 
 BLACK = FOREGROUND = 0, 0, 0

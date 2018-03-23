@@ -236,18 +236,6 @@ class Display(object):
 
         @install
         @SimpleFunctionWrapper
-        def good_viewer_location(stack):
-            viewers = list(self.iter_viewers())
-            if viewers:
-                viewers.sort(key=lambda (V, x, y): V.w * V.h)
-                V, x, y = viewers[-1]
-                coords = (x + 1, (y + V.h / 2, ()))
-            else:
-                coords = (0, (0, ()))
-            return coords, stack
-
-        @install
-        @SimpleFunctionWrapper
         def open_viewer(stack):
             ((x, (y, _)), (content, stack)) = stack
             V = self.open_viewer(x, y, text_viewer.TextViewer)

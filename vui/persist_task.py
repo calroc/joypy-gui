@@ -3,19 +3,31 @@ from collections import Counter
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
 from joy.library import SimpleFunctionWrapper
-import core
+import core, init_joy_home
 
 
 def open_repo(repo_dir=None, initialize=False):
     if not os.path.exists(repo_dir):
         os.makedirs(repo_dir, 0700)
-        return Repo.init(repo_dir)
+        return init_repo(repo_dir)
     try:
         return Repo(repo_dir)
     except NotGitRepository:
         if initialize:
-            return Repo.init(repo_dir)
+            return init_repo(repo_dir)
         raise
+
+
+def init_repo(repo_dir):
+    repo = Repo.init(repo_dir)
+    init_joy_home.initialize(repo_dir)
+    repo.stage([
+        fn
+        for fn in os.listdir(repo_dir)
+        if os.path.isfile(os.path.join(repo_dir, fn))
+        ])
+    repo.do_commit('Initial commit.', committer=core.COMMITTER)
+    return repo
 
 
 def foo(repo):

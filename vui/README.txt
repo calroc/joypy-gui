@@ -113,6 +113,7 @@ commands...
 
 
 Still to do:
+* Initial contents for JOY_HOME.
 * Return key can orphan a line at the bottom of a viewer.
 * Redirect stdout to "print" to the log.
 * Calculator buttons on the numpad?
