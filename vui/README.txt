@@ -18,7 +18,10 @@ The only dependencies are Pygame and Dulwich (a Python Git library.)
 When the main.py script starts it checks for an environment var "JOY_HOME"
 which should point to a directory where you want the system to store the
 files ("resources") it will edit and save, this directory defaults to
-'~/.joypy'.
+'~/.joypy'.  The first time you run it, it will create some default files
+as content.  Right click on see_resources to open a viewer with the list
+of resources (files), copy a name to the stack and right click on
+open_resource_at_good_location to open a viewer on that resource.
 
 Right now the screen size defaults to windowed 1024x768, but if you pass
 the '-f' option to the main.py script the UI will take up the full screen
@@ -113,7 +116,6 @@ commands...
 
 
 Still to do:
-* Initial contents for JOY_HOME.
 * Return key can orphan a line at the bottom of a viewer.
 * Redirect stdout to "print" to the log.
 * Calculator buttons on the numpad?
@@ -129,6 +131,7 @@ Still to do:
     viewer.  This shouldn't happen.
 
 Done:
+- Initial contents for JOY_HOME.
 - Pause/Break to open a trap viewer (in case you close them all.)
 - "shutdown" signal to tell PT to commit outstanding changes.
 - Local library auto-loaded at start-time
