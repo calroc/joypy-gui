@@ -230,67 +230,6 @@ class Display(object):
             for y, V in T.viewers:
                 yield V, x, y
 
-    def register_commands(self, D):
-
-        def install(command): D[command.name] = command
-
-        @install
-        @SimpleFunctionWrapper
-        def open_viewer(stack):
-            ((x, (y, _)), (content, stack)) = stack
-            V = self.open_viewer(x, y, text_viewer.TextViewer)
-            V.lines = content.splitlines()
-            V.draw()
-            return stack
-
-        @install
-        @SimpleFunctionWrapper
-        def open_stack(stack):
-            (x, (y, _)), stack = stack
-            V = self.open_viewer(x, y, stack_viewer.StackViewer)
-            V.draw()
-            return stack
-
-        @install
-        @SimpleFunctionWrapper
-        def open_resource(stack):
-            ((x, (y, _)), (name, stack)) = stack
-            om = OpenMessage(self, name)
-            self.broadcast(om)
-            if om.status == SUCCESS:
-                V = self.open_viewer(x, y, text_viewer.TextViewer)
-                V.content_id, V.lines = om.content_id, om.thing
-                V.draw()
-            return stack
-
-        @install
-        @SimpleFunctionWrapper
-        def name_viewer(stack):
-            name, stack = stack
-            assert isinstance(name, str), repr(name)
-            if self.focused_viewer and not self.focused_viewer.content_id:
-                self.focused_viewer.content_id = name
-                pm = PersistMessage(self, name, thing=self.focused_viewer.lines)
-                self.broadcast(pm)
-                self.focused_viewer.draw_menu()
-            return stack
-
-        @install
-        @SimpleFunctionWrapper
-        def persist_viewer(stack):
-            if self.focused_viewer:
-                
-                self.focused_viewer.content_id = name
-                self.focused_viewer.draw_menu()
-            return stack
-
-        @install
-        @SimpleFunctionWrapper
-        def inscribe(stack):
-            definition, stack = stack
-            DefinitionWrapper.add_def(definition, D)
-            return stack
-
     def done_resizing(self):
         for _, track in self.tracks: # This should be done by a Message?
             if track.resizing_viewer:

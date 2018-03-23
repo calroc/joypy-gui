@@ -164,17 +164,9 @@ class PersistTask(object):
             if os.path.isfile(os.path.join(self.home, fn))
             ])
 
-    def register_commands(self, D):
-
-        @SimpleFunctionWrapper
-        def list_resources(stack):
-            return '\n'.join(self.scan()), stack
-
-        D['list_resources'] = list_resources
-        
-
 
 def check_filename(name):
+    # TODO: improve this...
     if len(name) > 64:
         raise ValueError('bad name %r' % (name,))
     left, dot, right = name.partition('.')

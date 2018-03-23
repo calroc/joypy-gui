@@ -10,11 +10,85 @@ This file is execfile()'d with a namespace containing:
   world - the Joy environment
 
 '''
-from joy.library import FunctionWrapper, SimpleFunctionWrapper
+from joy.library import (
+    DefinitionWrapper,
+    FunctionWrapper,
+    SimpleFunctionWrapper,
+    )
 from joy.utils.stack import list_to_stack, pushback
+import core, text_viewer, stack_viewer
 
 
 def install(command): D[command.name] = command
+
+
+@install
+@SimpleFunctionWrapper
+def list_resources(stack):
+    return '\n'.join(pt.scan()), stack
+
+
+@install
+@SimpleFunctionWrapper
+def open_stack(stack):
+    (x, (y, _)), stack = stack
+    V = d.open_viewer(x, y, stack_viewer.StackViewer)
+    V.draw()
+    return stack
+
+
+@install
+@SimpleFunctionWrapper
+def open_resource(stack):
+    ((x, (y, _)), (name, stack)) = stack
+    om = core.OpenMessage(world, name)
+    d.broadcast(om)
+    if om.status == core.SUCCESS:
+        V = d.open_viewer(x, y, text_viewer.TextViewer)
+        V.content_id, V.lines = om.content_id, om.thing
+        V.draw()
+    return stack
+
+
+@install
+@SimpleFunctionWrapper
+def name_viewer(stack):
+    name, stack = stack
+    assert isinstance(name, str), repr(name)
+    if d.focused_viewer and not d.focused_viewer.content_id:
+        d.focused_viewer.content_id = name
+        pm = core.PersistMessage(world, name, thing=d.focused_viewer.lines)
+        d.broadcast(pm)
+        d.focused_viewer.draw_menu()
+    return stack
+
+
+##@install
+##@SimpleFunctionWrapper
+##def persist_viewer(stack):
+##    if self.focused_viewer:
+##        
+##        self.focused_viewer.content_id = name
+##        self.focused_viewer.draw_menu()
+##    return stack
+
+
+@install
+@SimpleFunctionWrapper
+def inscribe(stack):
+    definition, stack = stack
+    DefinitionWrapper.add_def(definition, D)
+    return stack
+
+
+@install
+@SimpleFunctionWrapper
+def open_viewer(stack):
+    ((x, (y, _)), (content, stack)) = stack
+    V = d.open_viewer(x, y, text_viewer.TextViewer)
+    V.lines = content.splitlines()
+    V.draw()
+    return stack
 
 
 @install

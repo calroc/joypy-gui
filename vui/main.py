@@ -57,8 +57,6 @@ def init_context(screen, clock, pt):
         D.__contains__,
         *((144 - 89, 144, 89) if FULLSCREEN else (89, 144))
         )
-    d.register_commands(D)
-    pt.register_commands(D)
     log = init_text(d, pt, 0, 0, 'log.txt')
     tho = init_text(d, pt, 0, d.h / 3, 'menu.txt')
     t = init_text(d, pt, d.w / 2, 0, 'scratch.txt')
