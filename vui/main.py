@@ -99,6 +99,7 @@ def main(screen, clock, pt):
 
     @SimpleFunctionWrapper
     def evaluate(stack):
+        '''Evaluate the Python code text on the top of the stack.'''
         code, stack = stack
         exec code in name_space.copy()
         return stack
