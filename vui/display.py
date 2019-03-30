@@ -316,6 +316,12 @@ class Display(object):
             else:
                 V.mouse_up(self, x, y, event.button)
 
+    def init_text(self, pt, x, y, filename):
+        viewer = self.open_viewer(x, y, text_viewer.TextViewer)
+        viewer.content_id, viewer.lines = pt.open(filename)
+        viewer.draw()
+        return viewer
+
 
 class Track(Viewer):
 

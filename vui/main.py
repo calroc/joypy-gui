@@ -15,13 +15,6 @@ if JOY_HOME is None:
         raise ValueError('what directory?')
 
 
-def init_text(display, pt, x, y, filename):
-    viewer = display.open_viewer(x, y, text_viewer.TextViewer)
-    viewer.content_id, viewer.lines = pt.open(filename)
-    viewer.draw()
-    return viewer
-
-
 def load_definitions(pt, dictionary):
     lines = pt.open('definitions.txt')[1]
     for line in lines:
@@ -57,9 +50,9 @@ def init_context(screen, clock, pt):
         D.__contains__,
         *((144 - 89, 144, 89) if FULLSCREEN else (89, 144))
         )
-    log = init_text(d, pt, 0, 0, 'log.txt')
-    tho = init_text(d, pt, 0, d.h / 3, 'menu.txt')
-    t = init_text(d, pt, d.w / 2, 0, 'scratch.txt')
+    log = d.init_text(pt, 0, 0, 'log.txt')
+    tho = d.init_text(pt, 0, d.h / 3, 'menu.txt')
+    t = d.init_text(pt, d.w / 2, 0, 'scratch.txt')
     loop = core.TheLoop(d, clock)
     stack_id, stack_holder = pt.open('stack.pickle')
     world = core.World(stack_id, stack_holder, D, d.broadcast, log)
