@@ -29,19 +29,13 @@ from copy import copy
 from sys import stderr
 from traceback import format_exc
 import pygame
-from joy.library import DefinitionWrapper, SimpleFunctionWrapper
 from core import (
-    OpenMessage,
-    PersistMessage,
-    SUCCESS,
     open_viewer_on_string,
-    BACKGROUND,
-    FOREGROUND,
     GREY,
     MOUSE_EVENTS,
     )
 from viewer import Viewer
-import text_viewer, stack_viewer
+import text_viewer
 
 
 class Display(object):
@@ -188,7 +182,7 @@ class Display(object):
 
         return new_viewer
 
-    def _move_viewer(self, to, rel_y, viewer, x, y):
+    def _move_viewer(self, to, rel_y, viewer, _x, y):
         '''
         Helper function to move (really copy) a viewer to a new location.
         '''
