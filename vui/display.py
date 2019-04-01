@@ -363,7 +363,7 @@ class Track(Viewer):
     def open_viewer(self, y, class_):
         '''Open and return a viewer of class_ at y.'''
         # Todo: if y coincides with some other viewer's y replace it.
-        viewer, viewer_y =  self.viewer_at(y)
+        viewer, viewer_y = self.viewer_at(y)
         h = viewer.split(viewer_y)
         new_viewer = class_(self.surface.subsurface((0, y, self.w, h)))
         new_viewer.draw()
@@ -397,7 +397,7 @@ class Track(Viewer):
         This might seem like it should be a method of the viewer, but
         the viewer knows nothing of its own y location on the screen nor
         the parent track's surface (to make a new subsurface) so it has
-        to be a method of the track, which has both. 
+        to be a method of the track, which has both.
         '''
         h = viewer.surface.get_height() + h
         try:
@@ -439,7 +439,7 @@ class Track(Viewer):
             else:
                 h = old_y - new_y
             self._grow_by(viewer, new_y, h)
-            
+
         else: # Shink self, enlarge upper neighbor.
             # Enforce invariant.
             try:
