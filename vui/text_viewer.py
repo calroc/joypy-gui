@@ -50,7 +50,7 @@ class Font(object):
     IMAGE = pygame.image.load('Iosevka12.BMP')
     LOOKUP = (string.ascii_letters +
               string.digits +
-              '''@#$&_~|`'"%^=-+*/\<>[]{}(),.;:!?''')
+              '''@#$&_~|`'"%^=-+*/\\<>[]{}(),.;:!?''')
 
     def __init__(self, char_w=8, char_h=19, line_h=19):
         self.char_w = char_w
@@ -126,14 +126,14 @@ class TextViewer(MenuViewer):
             if row is None: row = self.y
             return (row - self.v.at_line) * FONT.line_h
 
-        def up(self, mod):
+        def up(self, _mod):
             if self.y:
                 self.fade()
                 self.y -= 1
                 self.x = min(self.x, len(self.v.lines[self.y]))
                 self.draw()
 
-        def down(self, mod):
+        def down(self, _mod):
             if self.y < len(self.v.lines) - 1:
                 self.fade()
                 self.y += 1
@@ -141,7 +141,7 @@ class TextViewer(MenuViewer):
                 self.draw()
                 self._check_scroll()
 
-        def left(self, mod):
+        def left(self, _mod):
             if self.x:
                 self.fade()
                 self.x -= 1
@@ -153,7 +153,7 @@ class TextViewer(MenuViewer):
                 self.draw()
                 self._check_scroll()
 
-        def right(self, mod):
+        def right(self, _mod):
             if self.x < len(self.v.lines[self.y]):
                 self.fade()
                 self.x += 1
@@ -166,10 +166,10 @@ class TextViewer(MenuViewer):
                 self._check_scroll()
 
         def _check_scroll(self):
-                if self.y < self.v.at_line:
-                    self.v.scroll_down()
-                elif self.y > self.v.at_line + self.v.h_in_lines:
-                    self.v.scroll_up()
+            if self.y < self.v.at_line:
+                self.v.scroll_down()
+            elif self.y > self.v.at_line + self.v.h_in_lines:
+                self.v.scroll_up()
 
     def __init__(self, surface):
         self.cursor = self.Cursor(self)
@@ -178,7 +178,7 @@ class TextViewer(MenuViewer):
         self.content_id = None
         self.at_line = 0
         self.bg = BG
-        self.command = None
+        self.command = self.command_rect = None
         self._sel_start = self._sel_end = None
 
     def resurface(self, surface):
@@ -275,7 +275,7 @@ class TextViewer(MenuViewer):
         if self.command_rect and self.command_rect.collidepoint(x, y):
             return
         self._fade_command()
-        line, column, row = self.at(x, y)
+        line, column, _row = self.at(x, y)
         word_start = line.rfind(' ', 0, column) + 1
         word_end = line.find(' ', column)
         if word_end == -1: word_end = len(line)
@@ -323,7 +323,7 @@ class TextViewer(MenuViewer):
 
     def body_click(self, display, x, y, button):
         if button == 1:
-            line, column, row = self.at(x, y)
+            _line, column, row = self.at(x, y)
             self.cursor.set_to(column, row)
         elif button == 2:
             if pygame.KMOD_SHIFT & pygame.key.get_mods():
@@ -354,7 +354,7 @@ class TextViewer(MenuViewer):
             and self.body_rect.collidepoint(x, y)
             ):
             bx, by = self.body_rect.topleft
-            line, column, row = self.at(x - bx, y - by)
+            _line, column, row = self.at(x - bx, y - by)
             self.cursor.set_to(column, row)
         elif button2 and self.body_rect.collidepoint(x, y):
             bx, by = self.body_rect.topleft
@@ -549,7 +549,7 @@ class TextViewer(MenuViewer):
             return
         lines = self.lines[srow:erow + 1]
         assert len(lines) >= 2
-        first_line, last_line = lines[0], lines[-1]
+        first_line = lines[0]
         yield (
             scolumn * FONT.char_w,
             self.cursor.screen_y(srow),
@@ -574,7 +574,7 @@ class TextViewer(MenuViewer):
 
     # Key Handlers
 
-    def _printable_key(self, uch, mod, line, i):
+    def _printable_key(self, uch, _mod, line, i):
         line = line[:i] + uch + line[i:]
         self.lines[self.cursor.y] = line
         self.cursor.fade()
@@ -582,7 +582,7 @@ class TextViewer(MenuViewer):
         self.draw_line(self.cursor.screen_y(), line)
         self.cursor.draw()
 
-    def _backspace_key(self, mod, line, i):
+    def _backspace_key(self, _mod, line, i):
         res = False
         if i:
             line = line[:i - 1] + line[i:]
@@ -603,7 +603,7 @@ class TextViewer(MenuViewer):
             res = True
         return res
 
-    def _delete_key(self, mod, line, i):
+    def _delete_key(self, _mod, line, i):
         res = False
         if i < len(line):
             line = line[:i] + line[i + 1:]
@@ -627,7 +627,7 @@ class TextViewer(MenuViewer):
         elif key == pygame.K_LEFT: self.cursor.left(mod)
         elif key == pygame.K_RIGHT: self.cursor.right(mod)
 
-    def _return_key(self, mod, line, i):
+    def _return_key(self, _mod, line, i):
         self.cursor.fade()
         # Ignore the mods for now.
         n = self.cursor.y
@@ -640,7 +640,7 @@ class TextViewer(MenuViewer):
             self.draw_body()
             self.cursor.draw()
 
-    def _insert_key(self, display, mod, line, i):
+    def _insert_key(self, display, mod, _line, _i):
         om = OpenMessage(self, 'stack.pickle')
         display.broadcast(om)
         if om.status != SUCCESS:

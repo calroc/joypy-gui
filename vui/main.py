@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import os, pickle, sys, traceback
+import os, sys, traceback
 import pygame
 from joy.library import initialize, DefinitionWrapper, SimpleFunctionWrapper
-import core, display, text_viewer, persist_task
+import core, display, persist_task
 
 
 FULLSCREEN = '-f' in sys.argv
@@ -76,14 +76,14 @@ def error_guard(loop, n=10):
 
 class FileFaker(object):
 
-  def __init__(self, log):
-    self.log = log
+    def __init__(self, log):
+        self.log = log
 
-  def write(self, text):
-    self.log.append(text)
+    def write(self, text):
+        self.log.append(text)
 
-  def flush(self):
-    pass
+    def flush(self):
+        pass
 
 
 def main(screen, clock, pt):

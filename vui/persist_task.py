@@ -2,7 +2,6 @@ import os, pickle, traceback
 from collections import Counter
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
-from joy.library import SimpleFunctionWrapper
 import core, init_joy_home
 
 
@@ -30,7 +29,7 @@ def init_repo(repo_dir):
     return repo
 
 
-def foo(repo):
+def make_repo_relative_path_maker(repo):
     c = repo.controldir()
     def repo_relative_path(path):
         return os.path.relpath(path, os.path.commonprefix((c, path)))
@@ -78,7 +77,7 @@ class PersistTask(object):
     def __init__(self, home):
         self.home = home
         self.repo = open_repo(home)
-        self._r = foo(self.repo)
+        self._r = make_repo_relative_path_maker(self.repo)
         self.counter = Counter()
         self.store = {}
 
@@ -172,7 +171,7 @@ def check_filename(name):
     left, dot, right = name.partition('.')
     if not left.isalnum() or dot and not right.isalnum():
         raise ValueError('bad name %r' % (name,))
-        
+
 
 
 if __name__ == '__main__':
