@@ -11,7 +11,7 @@ from core import (
     SUCCESS,
     push,
     )
-import viewer
+import viewer, font_data
 reload(viewer)
 
 
@@ -47,7 +47,7 @@ def format_stack_item(content):
 
 class Font(object):
 
-    IMAGE = pygame.image.load('Iosevka12.BMP')
+    IMAGE = pygame.image.load(font_data.data, 'Iosevka12.BMP')
     LOOKUP = (string.ascii_letters +
               string.digits +
               '''@#$&_~|`'"%^=-+*/\\<>[]{}(),.;:!?''')
