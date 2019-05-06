@@ -15,8 +15,8 @@ from joy.library import (
     FunctionWrapper,
     SimpleFunctionWrapper,
     )
-from joy.utils.stack import list_to_stack, pushback
-import core, text_viewer, stack_viewer
+from joy.utils.stack import list_to_stack, concat
+from vui import core, text_viewer, stack_viewer
 
 
 def install(command): D[command.name] = command
@@ -163,7 +163,7 @@ def cmp_(stack, expression, dictionary):
 
     '''
     L, (E, (G, (b, (a, stack)))) = stack
-    expression = pushback(G if a > b else L if a < b else E, expression)
+    expression = concat(G if a > b else L if a < b else E, expression)
     return stack, expression, dictionary
 
 
